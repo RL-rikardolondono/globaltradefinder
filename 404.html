@@ -1,0 +1,1735 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Global Trade Finder</title>
+<meta name="description" content="Global Trade Finder: encuentre compradores y proveedores internacionales por país, sector, producto y código HS. Una aplicación de SkyNet Genesis.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 200%22%3E%3Crect x=%224%22 y=%224%22 width=%22192%22 height=%22192%22 rx=%2246%22 fill=%22%231E3A4C%22/%3E%3Cg stroke=%22%23fff%22 stroke-width=%226%22 stroke-linecap=%22round%22%3E%3Cpath d=%22M100 100L100 42M100 100L150 71M100 100L150 129M100 100L100 158M100 100L50 129M100 100L50 71%22/%3E%3C/g%3E%3Ccircle cx=%22100%22 cy=%2242%22 r=%2213%22 fill=%22%23E0A21A%22/%3E%3Ccircle cx=%22100%22 cy=%22100%22 r=%2220%22 fill=%22%23E0A21A%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: barra superior azul petróleo; buscador central con pestañas; vistas por ancla (#pais-CO, #hs-0901…) con migas de pan que siguen la ruta Continente → País → Sector → Producto → HS → Empresas */
+:root{
+  --petroleo:#1E3A4C; --petroleo-2:#2A4E64; --ambar:#E0A21A; --verde:#1F8A4C;
+  --bg:#EEF2F1; --surface:#FFFFFF; --text:#15232B; --muted:#4F6470; --line:#D5DFDD;
+  --chip:#E3EBEA; --bar:#1E3A4C; --soft-ambar:#FBF1DA; --soft-pet:#E2ECF1; --soft-verde:#E1F2E8;
+  --danger:#B53A2E; --on-dark:#FFFFFF; --link:#1E3A4C;
+  --f-title:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-text:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --petroleo:#3C7393; --petroleo-2:#4B86A8; --ambar:#E9B23A; --verde:#2BA05E;
+  --bg:#0F1A20; --surface:#172731; --text:#E6EEF0; --muted:#9FB3BC; --line:#284050;
+  --chip:#20343F; --bar:#13293A; --soft-ambar:#2E2714; --soft-pet:#1B3240; --soft-verde:#16301F;
+  --danger:#E57366; --link:#8FC3E0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --petroleo:#3C7393; --petroleo-2:#4B86A8; --ambar:#E9B23A; --verde:#2BA05E;
+  --bg:#0F1A20; --surface:#172731; --text:#E6EEF0; --muted:#9FB3BC; --line:#284050;
+  --chip:#20343F; --bar:#13293A; --soft-ambar:#2E2714; --soft-pet:#1B3240; --soft-verde:#16301F;
+  --danger:#E57366; --link:#8FC3E0; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-padding-top:80px}
+body{background:var(--bg);color:var(--text);font-family:var(--f-text);font-size:15.5px;line-height:1.55;margin:0}
+a{color:var(--link)}
+h1,h2,h3,h4{font-family:var(--f-title);font-weight:700;line-height:1.05;text-wrap:balance;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--ambar);outline-offset:2px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+
+/* Barra superior */
+.top{background:var(--bar);color:var(--on-dark);position:sticky;top:env(safe-area-inset-top,0px);z-index:30}
+.top .wrap{display:flex;align-items:center;gap:14px;min-height:64px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;margin-right:auto}
+.brand svg{width:40px;height:40px;flex:none}
+.brand .wm{display:flex;flex-direction:column;line-height:.95}
+.brand .wm b{font-family:var(--f-title);font-size:1.45rem;letter-spacing:.05em;text-transform:uppercase;font-weight:700}
+.brand .wm b span{color:var(--ambar)}
+.brand .wm small{font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:#B9CBD4;font-weight:600}
+.nav{display:flex;gap:2px;flex-wrap:wrap;align-items:center}
+.nav a{color:#fff;text-decoration:none;padding:8px 11px;border-radius:6px;font-weight:600;font-size:.92rem;border-bottom:3px solid transparent}
+.nav a:hover{background:rgba(255,255,255,.08)}
+.nav a.on{border-bottom-color:var(--ambar)}
+.nav a.cta{background:var(--ambar);color:#15232B}
+.lang{display:flex;border:1.5px solid rgba(255,255,255,.35);border-radius:7px;overflow:hidden}
+.lang button{background:transparent;border:0;color:#fff;padding:5px 9px;font-weight:700;font-size:.8rem;cursor:pointer}
+.lang button[aria-pressed="true"]{background:#fff;color:#1E3A4C}
+.menu-btn{display:none;background:transparent;border:1.5px solid rgba(255,255,255,.35);color:#fff;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer}
+
+.demo-strip{background:var(--soft-ambar);border-bottom:1px solid var(--ambar);font-size:.85rem}
+.demo-strip .wrap{padding-block:7px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.demo-strip b{font-weight:700}
+
+/* Botones */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border-radius:8px;border:0;cursor:pointer;font-weight:700;text-decoration:none;font-size:.94rem;line-height:1.2}
+.btn-main{background:var(--petroleo);color:#fff}
+.btn-main:hover{background:var(--petroleo-2)}
+.btn-amb{background:var(--ambar);color:#15232B}
+.btn-amb:hover{filter:brightness(1.06)}
+.btn-wa{background:var(--verde);color:#fff}
+.btn-wa:hover{filter:brightness(1.08)}
+.btn-ghost{background:transparent;color:var(--text);border:1.5px solid var(--line)}
+.btn-ghost:hover{border-color:var(--petroleo)}
+.btn-sm{padding:7px 11px;font-size:.86rem}
+.btn svg{width:17px;height:17px;flex:none}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.linkbtn{background:none;border:0;padding:0;color:var(--link);font-weight:600;cursor:pointer;text-decoration:underline}
+
+/* Portada */
+.hero{padding-block:44px 28px}
+.eyebrow{font-family:var(--f-title);text-transform:uppercase;letter-spacing:.14em;font-weight:700;color:var(--petroleo);font-size:.98rem;display:flex;align-items:center;gap:10px}
+:root[data-theme="dark"] .eyebrow{color:var(--link)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .eyebrow{color:var(--link)}}
+.eyebrow::before{content:"";width:26px;height:4px;border-radius:2px;background:var(--ambar);flex:none}
+.hero h1{font-size:clamp(2.3rem,5vw,3.9rem);text-transform:uppercase;margin-top:10px;letter-spacing:.005em;max-width:22ch}
+.hero h1 span{color:var(--ambar)}
+.hero p.lead{max-width:62ch;color:var(--muted);font-size:1.06rem;margin:14px 0 22px}
+
+.searchbox{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 8px 28px rgba(21,35,43,.08)}
+.stabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.stabs button{border:0;background:transparent;padding:8px 12px;border-radius:7px;font-weight:700;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;font-size:.93rem}
+.stabs button[aria-selected="true"]{color:var(--text);border-bottom-color:var(--ambar);background:var(--soft-ambar)}
+.srow{display:flex;gap:8px;position:relative}
+.srow input{flex:1;min-width:0;padding:13px 14px;border-radius:9px;border:1.5px solid var(--line);background:var(--bg);font-size:1.02rem}
+.srow input:focus{border-color:var(--petroleo);outline:none}
+.suggest{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.15);z-index:20;max-height:340px;overflow:auto}
+.suggest button{display:flex;gap:10px;align-items:baseline;width:100%;text-align:left;background:none;border:0;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--line)}
+.suggest button:hover,.suggest button.act{background:var(--soft-pet)}
+.suggest .k{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;min-width:62px}
+.quick{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;align-items:center;font-size:.86rem}
+.quick .lbl{color:var(--muted);margin-right:4px}
+
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--chip);color:var(--text);padding:3px 9px;border-radius:99px;font-size:.82rem;font-weight:600;text-decoration:none;cursor:pointer;white-space:nowrap}
+button.chip:hover,a.chip:hover{border-color:var(--petroleo)}
+.chip .mono{font-size:.78rem}
+.cc{display:inline-grid;place-items:center;min-width:28px;height:20px;padding:0 5px;border-radius:4px;background:var(--petroleo);color:#fff;font-family:var(--f-mono);font-size:.72rem;font-weight:700;letter-spacing:.04em}
+
+.path{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:26px}
+.path div{border-top:4px solid var(--line);padding-top:8px;font-size:.84rem}
+.path div b{display:block;font-family:var(--f-title);font-size:1.12rem;text-transform:uppercase;letter-spacing:.04em}
+.path div span{color:var(--muted)}
+.path div:nth-child(-n+3){border-top-color:var(--petroleo)}
+.path div:nth-child(n+4):nth-child(-n+6){border-top-color:var(--ambar)}
+.path div:last-child{border-top-color:var(--verde)}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px}
+.stat b{display:block;font-family:var(--f-title);font-size:2rem;line-height:1;font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:.86rem}
+
+/* Secciones */
+section{padding-block:26px}
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.sec-head h2{font-size:clamp(1.7rem,3.4vw,2.3rem);text-transform:uppercase}
+.page{padding-block:24px 30px}
+.page h1{font-size:clamp(2rem,4.6vw,3.1rem);text-transform:uppercase}
+.page .lead{color:var(--muted);max-width:70ch;margin:6px 0 0}
+
+.crumbs{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:.86rem;margin-bottom:14px;color:var(--muted)}
+.crumbs a{color:var(--link);text-decoration:none;font-weight:600}
+.crumbs a:hover{text-decoration:underline}
+.crumbs .sep{opacity:.6}
+.crumbs .lv{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;background:var(--chip);border-radius:4px;padding:1px 5px;margin-right:3px;color:var(--muted)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;text-decoration:none;color:var(--text);display:flex;flex-direction:column;gap:6px;min-width:0;cursor:pointer;text-align:left}
+.tile:hover{border-color:var(--petroleo)}
+.tile h3{font-size:1.35rem}
+.tile .meta{display:flex;gap:10px;flex-wrap:wrap;font-size:.84rem;color:var(--muted)}
+.tile .meta b{color:var(--text);font-variant-numeric:tabular-nums}
+
+/* Resultados */
+.layout{display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start}
+.layout>*{min-width:0}
+.filters{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:12px;position:sticky;top:80px}
+.filters h3{font-size:1.2rem;text-transform:uppercase}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label{font-weight:700;font-size:.86rem}
+.field input,.field select,.field textarea{padding:9px 11px;border-radius:8px;border:1.5px solid var(--line);background:var(--bg);width:100%}
+.field textarea{min-height:90px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--petroleo);outline:none}
+.field .hint{font-size:.8rem;color:var(--muted)}
+.field .err{color:var(--danger);font-size:.82rem;min-height:1em}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:.9rem}
+.check input{width:18px;height:18px;margin-top:2px;flex:none}
+
+.resbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.resbar h2{font-size:1.6rem;text-transform:uppercase}
+.resbar .acts{display:flex;gap:6px;flex-wrap:wrap}
+.list{display:flex;flex-direction:column;gap:10px}
+.co{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;grid-template-columns:1fr auto;gap:8px 16px;align-items:start}
+.co:hover{border-color:var(--petroleo)}
+.co h3{font-size:1.32rem}
+.co h3 a{color:var(--text);text-decoration:none}
+.co h3 a:hover{text-decoration:underline}
+.co .line{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.86rem;color:var(--muted)}
+.co .codes{display:flex;gap:5px;flex-wrap:wrap;grid-column:1/-1}
+.co .side{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.role{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:5px;white-space:nowrap}
+.role.buyer{background:var(--soft-ambar);color:var(--text);border:1px solid var(--ambar)}
+.role.supplier{background:var(--soft-pet);color:var(--text);border:1px solid var(--petroleo)}
+.role.both{background:var(--soft-verde);color:var(--text);border:1px solid var(--verde)}
+.ver{color:var(--verde);font-weight:700;font-size:.8rem;display:inline-flex;gap:4px;align-items:center}
+.demo{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border:1px dashed var(--muted);border-radius:4px;padding:1px 5px}
+.mine{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:var(--ambar);color:#15232B;border-radius:4px;padding:2px 6px}
+
+table.t{width:100%;border-collapse:collapse;font-size:.92rem;font-variant-numeric:tabular-nums}
+table.t th{text-align:left;font-size:.76rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-bottom:2px solid var(--line);padding:8px 10px}
+table.t td{border-bottom:1px solid var(--line);padding:9px 10px;vertical-align:top}
+table.t tr:hover td{background:var(--soft-pet)}
+table.t td.r,table.t th.r{text-align:right}
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.codecell{font-family:var(--f-mono);font-weight:700;white-space:nowrap}
+.codecell a{color:var(--link);text-decoration:none}
+
+.bars{display:flex;flex-direction:column;gap:7px}
+.bar{display:grid;grid-template-columns:minmax(0,1.4fr) 2fr 42px;gap:10px;align-items:center;font-size:.86rem}
+.bar .lab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .trk{background:var(--chip);border-radius:4px;height:12px;overflow:hidden;display:flex}
+.bar .s{background:var(--petroleo);height:100%}
+.bar .b{background:var(--ambar);height:100%}
+.bar .v{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.legend{display:flex;gap:14px;font-size:.8rem;color:var(--muted);margin-bottom:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:middle}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.panel h2{font-size:1.45rem;text-transform:uppercase;margin-bottom:10px}
+.two{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;align-items:start}
+.two>*{min-width:0}
+.stack{display:flex;flex-direction:column;gap:16px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:.92rem}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.lock{border:1.5px dashed var(--ambar);background:var(--soft-ambar);border-radius:10px;padding:14px;font-size:.92rem}
+.lock b{display:block;margin-bottom:4px}
+.blur{filter:blur(4px);user-select:none}
+
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button{background:var(--surface);border:0;padding:7px 12px;font-weight:700;cursor:pointer;font-size:.88rem;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--petroleo);color:#fff}
+
+.plans{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.plan{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.plan.rec{border:2px solid var(--ambar)}
+.plan h3{font-size:1.6rem;text-transform:uppercase}
+.plan .who{font-size:.86rem;color:var(--muted)}
+.plan .price{font-family:var(--f-title);font-size:1.5rem;font-weight:700}
+.plan ul{margin:0;padding-left:18px;font-size:.9rem;display:flex;flex-direction:column;gap:4px}
+.plan .acts{margin-top:auto;display:flex;flex-direction:column;gap:6px}
+.badge-cur{align-self:flex-start;background:var(--verde);color:#fff;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em}
+
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.opt{display:flex;flex-direction:column;gap:3px;border:2px solid var(--line);border-radius:10px;padding:12px;cursor:pointer;background:var(--bg);text-align:left;width:100%}
+.opt:hover{border-color:var(--petroleo)}
+.opt[aria-pressed="true"]{border-color:var(--ambar);background:var(--soft-ambar)}
+.opt b{font-size:1rem}
+.opt span{font-size:.84rem;color:var(--muted);line-height:1.35}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fields .full{grid-column:1/-1}
+.chips-in{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chips-in .chip button{background:none;border:0;cursor:pointer;padding:0 0 0 2px;font-weight:700;color:var(--muted)}
+
+.empty{text-align:center;padding:30px 16px;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:12px}
+.empty b{display:block;color:var(--text);font-size:1.05rem;margin-bottom:4px}
+
+.modal-bg{position:fixed;inset:0;background:rgba(10,20,26,.55);z-index:50;display:grid;place-items:center;padding:16px}
+.modal{background:var(--surface);color:var(--text);border-radius:14px;max-width:760px;width:100%;max-height:88vh;overflow:auto;padding:20px;border:1px solid var(--line)}
+.modal h2{font-size:1.6rem;text-transform:uppercase;margin-bottom:8px}
+.modal .acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:14px}
+.report-foot{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:.82rem;color:var(--muted);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.report-foot svg{width:22px;height:22px}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:9px;font-weight:600;z-index:60;max-width:calc(100% - 32px);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+
+.wa-float{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--verde);color:#fff;border-radius:99px;display:flex;align-items:center;gap:8px;padding:12px 16px;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:25;text-decoration:none;font-weight:700;font-size:.9rem}
+.wa-float svg{width:22px;height:22px}
+
+footer{border-top:1px solid var(--line);margin-top:30px;padding-block:24px 80px;color:var(--muted);font-size:.86rem}
+footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center}
+footer .sg{display:flex;align-items:center;gap:10px}
+footer .sg svg{width:30px;height:30px;flex:none}
+footer a{color:var(--muted);font-weight:600;text-decoration:none;margin-right:14px}
+footer a:hover{color:var(--text)}
+
+@media (max-width:980px){
+  .layout,.two{grid-template-columns:1fr}
+  .filters{position:static}
+  .plans{grid-template-columns:1fr 1fr}
+  .path{grid-template-columns:repeat(4,1fr)}
+}
+@media (max-width:760px){
+  .menu-btn{display:inline-flex}
+  .nav{display:none;width:100%;flex-direction:column;align-items:stretch;padding-bottom:10px}
+  .nav.open{display:flex}
+  .nav a{padding:11px 10px}
+  .nav a.on{border-bottom-color:transparent;background:rgba(255,255,255,.08)}
+  .stats{grid-template-columns:1fr 1fr}
+  .opts,.fields{grid-template-columns:1fr}
+  .co{grid-template-columns:1fr}
+  .co .side{align-items:flex-start;flex-direction:row;flex-wrap:wrap}
+  .wa-float span{display:none}
+  .wa-float{padding:14px}
+}
+@media (max-width:520px){
+  .plans{grid-template-columns:1fr}
+  .path{grid-template-columns:1fr 1fr}
+  .brand .wm b{font-size:1.2rem}
+  .brand svg{width:34px;height:34px}
+  .bar{grid-template-columns:minmax(0,1fr) 1fr 36px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{
+  .top,.demo-strip,.wa-float,footer,.filters,.no-print{display:none!important}
+  body{background:#fff;color:#000}
+  .modal-bg{position:static;background:none;padding:0}
+  .modal{max-height:none;border:0}
+}
+@media print{ body.pr #view{display:none!important} }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#inicio" aria-label="Global Trade Finder">
+      <svg viewBox="0 0 200 200" aria-hidden="true"><rect x="4" y="4" width="192" height="192" rx="46" fill="#1E3A4C" stroke="rgba(255,255,255,.25)" stroke-width="4"/><g stroke="#FFFFFF" stroke-linecap="round"><polygon points="100,42 150.2,71 150.2,129 100,158 49.8,129 49.8,71" fill="none" stroke-opacity=".35" stroke-width="4"/><path d="M100 100L100 42M100 100L150.2 71M100 100L150.2 129M100 100L100 158M100 100L49.8 129M100 100L49.8 71" stroke-width="6"/></g><g fill="#FFFFFF"><circle cx="150.2" cy="71" r="10"/><circle cx="150.2" cy="129" r="10"/><circle cx="100" cy="158" r="10"/><circle cx="49.8" cy="129" r="10"/><circle cx="49.8" cy="71" r="10"/></g><circle cx="100" cy="42" r="13" fill="#E0A21A"/><circle cx="100" cy="100" r="20" fill="#E0A21A"/></svg>
+      <span class="wm"><b>Global <span>Trade</span> Finder</b><small>by SkyNet Genesis</small></span>
+    </a>
+    <button type="button" class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="mainNav">Menú</button>
+    <nav class="nav" id="mainNav" aria-label="Principal"></nav>
+    <div class="lang" role="group" aria-label="Idioma / Language">
+      <button type="button" id="lang-es" data-lang="es">ES</button>
+      <button type="button" id="lang-en" data-lang="en">EN</button>
+    </div>
+  </div>
+</header>
+<div class="demo-strip" id="demoStrip"></div>
+<main id="view"></main>
+<div id="modalRoot"></div>
+<footer>
+  <div class="wrap">
+    <div class="sg">
+      <svg viewBox="0 0 200 200" aria-hidden="true"><rect x="4" y="4" width="192" height="192" rx="46" fill="#1E3A4C"/><g stroke="#FFFFFF" stroke-linecap="round"><polygon points="100,42 150.2,71 150.2,129 100,158 49.8,129 49.8,71" fill="none" stroke-opacity=".35" stroke-width="4"/><path d="M100 100L100 42M100 100L150.2 71M100 100L150.2 129M100 100L100 158M100 100L49.8 129M100 100L49.8 71" stroke-width="6"/></g><g fill="#FFFFFF"><circle cx="150.2" cy="71" r="10"/><circle cx="150.2" cy="129" r="10"/><circle cx="100" cy="158" r="10"/><circle cx="49.8" cy="129" r="10"/><circle cx="49.8" cy="71" r="10"/></g><circle cx="100" cy="42" r="13" fill="#E0A21A"/><circle cx="100" cy="100" r="20" fill="#E0A21A"/></svg>
+      <span id="footTxt"></span>
+    </div>
+    <div id="footLinks"></div>
+  </div>
+</footer>
+<a class="wa-float" id="waFloat" href="https://wa.me/573044375758" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm4.5 12.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.5-.3Z"/></svg><span id="waTxt">Soporte</span></a>
+<script>
+/* ================================================================
+   GLOBAL TRADE FINDER — Datos de referencia
+   - Geografía: regiones y subregiones según la clasificación M49 de la ONU
+   - Productos: Sistema Armonizado (HS 2022) — 21 secciones, 96 capítulos,
+     partidas y subpartidas seleccionadas
+   - Empresas: DATOS DE DEMOSTRACIÓN (ficticias) generados en app.js
+   ================================================================ */
+
+const GEO = [
+  { id:"AF", es:"África", en:"Africa", subs:[
+    { id:"AF-N", es:"Norte de África", en:"Northern Africa", c:["DZ","EG","MA","TN"] },
+    { id:"AF-W", es:"África Occidental", en:"Western Africa", c:["NG","GH","CI","SN"] },
+    { id:"AF-E", es:"África Oriental", en:"Eastern Africa", c:["KE","ET","TZ","UG"] },
+    { id:"AF-M", es:"África Central", en:"Middle Africa", c:["CM","AO"] },
+    { id:"AF-S", es:"África Austral", en:"Southern Africa", c:["ZA","BW","NA"] } ]},
+  { id:"AM", es:"América", en:"Americas", subs:[
+    { id:"AM-N", es:"Norteamérica", en:"Northern America", c:["US","CA"] },
+    { id:"AM-C", es:"Centroamérica y México", en:"Central America & Mexico", c:["MX","GT","HN","SV","CR","PA"] },
+    { id:"AM-K", es:"Caribe", en:"Caribbean", c:["DO","JM","TT","PR"] },
+    { id:"AM-S", es:"Sudamérica", en:"South America", c:["CO","BR","AR","CL","PE","EC","UY","PY","BO"] } ]},
+  { id:"AS", es:"Asia", en:"Asia", subs:[
+    { id:"AS-E", es:"Asia Oriental", en:"Eastern Asia", c:["CN","JP","KR","MN"] },
+    { id:"AS-SE", es:"Sudeste Asiático", en:"South-eastern Asia", c:["VN","TH","ID","MY","SG","PH"] },
+    { id:"AS-S", es:"Asia Meridional", en:"Southern Asia", c:["IN","BD","PK","LK"] },
+    { id:"AS-W", es:"Asia Occidental", en:"Western Asia", c:["AE","SA","TR","IL","QA"] },
+    { id:"AS-C", es:"Asia Central", en:"Central Asia", c:["KZ","UZ"] } ]},
+  { id:"EU", es:"Europa", en:"Europe", subs:[
+    { id:"EU-W", es:"Europa Occidental", en:"Western Europe", c:["DE","FR","NL","BE","CH","AT"] },
+    { id:"EU-N", es:"Europa del Norte", en:"Northern Europe", c:["GB","IE","SE","NO","DK","FI"] },
+    { id:"EU-S", es:"Europa Meridional", en:"Southern Europe", c:["ES","IT","PT","GR"] },
+    { id:"EU-E", es:"Europa Oriental", en:"Eastern Europe", c:["PL","CZ","RO","HU","UA"] } ]},
+  { id:"OC", es:"Oceanía", en:"Oceania", subs:[
+    { id:"OC-A", es:"Australia y Nueva Zelanda", en:"Australia & New Zealand", c:["AU","NZ"] },
+    { id:"OC-M", es:"Melanesia", en:"Melanesia", c:["PG","FJ"] } ]}
+];
+
+/* Moneda y sufijo societario de demostración por país */
+const LEGAL = { CO:"S.A.S.", MX:"S.A. de C.V.", BR:"Ltda.", AR:"S.R.L.", CL:"SpA", PE:"S.A.C.", EC:"Cía. Ltda.", UY:"S.R.L.", PY:"S.A.", BO:"S.R.L.",
+  GT:"S.A.", HN:"S. de R.L.", SV:"S.A. de C.V.", CR:"S.R.L.", PA:"Corp.", DO:"S.R.L.", JM:"Ltd.", TT:"Ltd.", PR:"LLC",
+  US:"Inc.", CA:"Inc.", GB:"Ltd.", IE:"Ltd.", DE:"GmbH", AT:"GmbH", CH:"AG", FR:"SAS", BE:"BV", NL:"B.V.", ES:"S.L.", IT:"S.r.l.", PT:"Lda.", GR:"S.A.",
+  SE:"AB", NO:"AS", DK:"ApS", FI:"Oy", PL:"Sp. z o.o.", CZ:"s.r.o.", RO:"S.R.L.", HU:"Kft.", UA:"LLC",
+  CN:"Co., Ltd.", JP:"K.K.", KR:"Co., Ltd.", MN:"LLC", VN:"JSC", TH:"Co., Ltd.", ID:"PT", MY:"Sdn. Bhd.", SG:"Pte. Ltd.", PH:"Inc.",
+  IN:"Pvt. Ltd.", BD:"Ltd.", PK:"(Pvt.) Ltd.", LK:"(Pvt) Ltd.", AE:"LLC", SA:"Co.", TR:"A.Ş.", IL:"Ltd.", QA:"W.L.L.", KZ:"LLP", UZ:"LLC",
+  AU:"Pty Ltd", NZ:"Ltd.", PG:"Ltd.", FJ:"Ltd.", ZA:"(Pty) Ltd", BW:"(Pty) Ltd", NA:"(Pty) Ltd", NG:"Ltd.", GH:"Ltd.", CI:"SARL", SN:"SARL",
+  KE:"Ltd.", ET:"PLC", TZ:"Ltd.", UG:"Ltd.", CM:"SARL", AO:"Lda.", DZ:"SARL", EG:"S.A.E.", MA:"SARL", TN:"SARL" };
+
+/* Sectores económicos (agrupan partidas HS) */
+const SECTORS = [
+  { id:"agro", es:"Agroindustria y alimentos frescos", en:"Agribusiness & fresh produce" },
+  { id:"food", es:"Alimentos procesados y bebidas", en:"Processed food & beverages" },
+  { id:"flor", es:"Flores y plantas", en:"Flowers & plants" },
+  { id:"ener", es:"Energía y minería", en:"Energy & mining" },
+  { id:"chem", es:"Química, farmacia y cosmética", en:"Chemicals, pharma & cosmetics" },
+  { id:"plas", es:"Plásticos y caucho", en:"Plastics & rubber" },
+  { id:"text", es:"Textil, confección y calzado", en:"Textiles, apparel & footwear" },
+  { id:"wood", es:"Madera, papel y empaques", en:"Wood, paper & packaging" },
+  { id:"metl", es:"Metales y piedras preciosas", en:"Metals & precious stones" },
+  { id:"mach", es:"Maquinaria y electrónica", en:"Machinery & electronics" },
+  { id:"auto", es:"Automotriz y transporte", en:"Automotive & transport" },
+  { id:"med",  es:"Dispositivos médicos", en:"Medical devices" },
+  { id:"cons", es:"Construcción y hogar", en:"Construction & home" }
+];
+
+/* HS 2022 — Secciones */
+const HS_SECTIONS = [
+  { id:"I",    ch:[1,5],   es:"Animales vivos y productos del reino animal", en:"Live animals; animal products" },
+  { id:"II",   ch:[6,14],  es:"Productos del reino vegetal", en:"Vegetable products" },
+  { id:"III",  ch:[15,15], es:"Grasas y aceites animales o vegetales", en:"Animal or vegetable fats and oils" },
+  { id:"IV",   ch:[16,24], es:"Productos de las industrias alimentarias; bebidas; tabaco", en:"Prepared foodstuffs; beverages; tobacco" },
+  { id:"V",    ch:[25,27], es:"Productos minerales", en:"Mineral products" },
+  { id:"VI",   ch:[28,38], es:"Productos de las industrias químicas", en:"Products of the chemical industries" },
+  { id:"VII",  ch:[39,40], es:"Plástico y caucho, y sus manufacturas", en:"Plastics and rubber" },
+  { id:"VIII", ch:[41,43], es:"Pieles, cueros y sus manufacturas", en:"Hides, skins, leather" },
+  { id:"IX",   ch:[44,46], es:"Madera, corcho y cestería", en:"Wood, cork and basketware" },
+  { id:"X",    ch:[47,49], es:"Pasta de madera, papel y cartón", en:"Pulp, paper and paperboard" },
+  { id:"XI",   ch:[50,63], es:"Materias textiles y sus manufacturas", en:"Textiles and textile articles" },
+  { id:"XII",  ch:[64,67], es:"Calzado, sombreros y paraguas", en:"Footwear, headgear, umbrellas" },
+  { id:"XIII", ch:[68,70], es:"Manufacturas de piedra, cerámica y vidrio", en:"Stone, ceramic and glass" },
+  { id:"XIV",  ch:[71,71], es:"Perlas, piedras y metales preciosos", en:"Pearls, precious stones and metals" },
+  { id:"XV",   ch:[72,83], es:"Metales comunes y sus manufacturas", en:"Base metals and articles" },
+  { id:"XVI",  ch:[84,85], es:"Máquinas y aparatos eléctricos", en:"Machinery and electrical equipment" },
+  { id:"XVII", ch:[86,89], es:"Material de transporte", en:"Vehicles, aircraft, vessels" },
+  { id:"XVIII",ch:[90,92], es:"Óptica, instrumentos médicos y de medida", en:"Optical, medical and measuring instruments" },
+  { id:"XIX",  ch:[93,93], es:"Armas y municiones", en:"Arms and ammunition" },
+  { id:"XX",   ch:[94,96], es:"Mercancías y productos diversos", en:"Miscellaneous manufactured articles" },
+  { id:"XXI",  ch:[97,97], es:"Objetos de arte y antigüedades", en:"Works of art and antiques" }
+];
+
+/* HS 2022 — Capítulos [código, español, inglés] (el 77 está reservado) */
+const HS_CHAPTERS = [
+ ["01","Animales vivos","Live animals"],
+ ["02","Carne y despojos comestibles","Meat and edible offal"],
+ ["03","Pescados, crustáceos y moluscos","Fish, crustaceans and molluscs"],
+ ["04","Leche y lácteos; huevos; miel","Dairy produce; eggs; honey"],
+ ["05","Demás productos de origen animal","Other products of animal origin"],
+ ["06","Plantas vivas y flores cortadas","Live plants and cut flowers"],
+ ["07","Hortalizas, plantas, raíces y tubérculos","Edible vegetables, roots and tubers"],
+ ["08","Frutas y frutos comestibles","Edible fruit and nuts"],
+ ["09","Café, té, yerba mate y especias","Coffee, tea, maté and spices"],
+ ["10","Cereales","Cereals"],
+ ["11","Productos de la molinería; malta; almidón","Milling products; malt; starches"],
+ ["12","Semillas y frutos oleaginosos","Oil seeds and oleaginous fruits"],
+ ["13","Gomas, resinas y extractos vegetales","Lac; gums, resins, vegetable extracts"],
+ ["14","Materias trenzables vegetales","Vegetable plaiting materials"],
+ ["15","Grasas y aceites animales o vegetales","Animal or vegetable fats and oils"],
+ ["16","Preparaciones de carne o pescado","Preparations of meat or fish"],
+ ["17","Azúcares y artículos de confitería","Sugars and sugar confectionery"],
+ ["18","Cacao y sus preparaciones","Cocoa and cocoa preparations"],
+ ["19","Preparaciones a base de cereales o leche","Preparations of cereals, flour or milk"],
+ ["20","Preparaciones de hortalizas y frutas","Preparations of vegetables and fruit"],
+ ["21","Preparaciones alimenticias diversas","Miscellaneous edible preparations"],
+ ["22","Bebidas, líquidos alcohólicos y vinagre","Beverages, spirits and vinegar"],
+ ["23","Residuos alimentarios; alimentos para animales","Food residues; animal fodder"],
+ ["24","Tabaco y sucedáneos","Tobacco and substitutes"],
+ ["25","Sal, azufre, tierras, piedras, cales y cementos","Salt, sulphur, earths, stone, cement"],
+ ["26","Minerales metalíferos, escorias y cenizas","Ores, slag and ash"],
+ ["27","Combustibles y aceites minerales","Mineral fuels and mineral oils"],
+ ["28","Productos químicos inorgánicos","Inorganic chemicals"],
+ ["29","Productos químicos orgánicos","Organic chemicals"],
+ ["30","Productos farmacéuticos","Pharmaceutical products"],
+ ["31","Abonos","Fertilisers"],
+ ["32","Extractos curtientes y tintóreos; pinturas","Tanning and dyeing extracts; paints"],
+ ["33","Aceites esenciales; perfumería y cosmética","Essential oils; perfumery and cosmetics"],
+ ["34","Jabones, ceras y preparaciones de limpieza","Soap, waxes, cleaning preparations"],
+ ["35","Materias albuminoideas; colas; enzimas","Albuminoidal substances; glues; enzymes"],
+ ["36","Pólvoras y explosivos; fósforos","Explosives; matches"],
+ ["37","Productos fotográficos y cinematográficos","Photographic and cinematographic goods"],
+ ["38","Productos diversos de las industrias químicas","Miscellaneous chemical products"],
+ ["39","Plástico y sus manufacturas","Plastics and articles thereof"],
+ ["40","Caucho y sus manufacturas","Rubber and articles thereof"],
+ ["41","Pieles y cueros","Raw hides, skins and leather"],
+ ["42","Manufacturas de cuero; artículos de viaje","Articles of leather; travel goods"],
+ ["43","Peletería","Furskins and artificial fur"],
+ ["44","Madera y manufacturas de madera","Wood and articles of wood"],
+ ["45","Corcho y sus manufacturas","Cork and articles of cork"],
+ ["46","Manufacturas de espartería o cestería","Basketware and wickerwork"],
+ ["47","Pasta de madera; papel para reciclar","Pulp of wood; recovered paper"],
+ ["48","Papel y cartón","Paper and paperboard"],
+ ["49","Productos editoriales y de imprenta","Printed books and newspapers"],
+ ["50","Seda","Silk"],
+ ["51","Lana y pelo fino","Wool and fine animal hair"],
+ ["52","Algodón","Cotton"],
+ ["53","Demás fibras textiles vegetales","Other vegetable textile fibres"],
+ ["54","Filamentos sintéticos o artificiales","Man-made filaments"],
+ ["55","Fibras sintéticas o artificiales discontinuas","Man-made staple fibres"],
+ ["56","Guata, fieltro y cordelería","Wadding, felt and twine"],
+ ["57","Alfombras","Carpets"],
+ ["58","Tejidos especiales; encajes; bordados","Special woven fabrics; lace; embroidery"],
+ ["59","Tejidos impregnados o recubiertos","Coated or laminated textile fabrics"],
+ ["60","Tejidos de punto","Knitted or crocheted fabrics"],
+ ["61","Prendas de vestir de punto","Apparel, knitted or crocheted"],
+ ["62","Prendas de vestir, excepto de punto","Apparel, not knitted"],
+ ["63","Demás artículos textiles confeccionados","Other made-up textile articles"],
+ ["64","Calzado","Footwear"],
+ ["65","Sombreros y tocados","Headgear"],
+ ["66","Paraguas y bastones","Umbrellas and walking sticks"],
+ ["67","Plumas preparadas; flores artificiales","Prepared feathers; artificial flowers"],
+ ["68","Manufacturas de piedra, yeso y cemento","Articles of stone, plaster, cement"],
+ ["69","Productos cerámicos","Ceramic products"],
+ ["70","Vidrio y sus manufacturas","Glass and glassware"],
+ ["71","Perlas, piedras y metales preciosos; joyería","Pearls, precious stones, metals; jewellery"],
+ ["72","Fundición, hierro y acero","Iron and steel"],
+ ["73","Manufacturas de hierro o acero","Articles of iron or steel"],
+ ["74","Cobre y sus manufacturas","Copper and articles thereof"],
+ ["75","Níquel y sus manufacturas","Nickel and articles thereof"],
+ ["76","Aluminio y sus manufacturas","Aluminium and articles thereof"],
+ ["78","Plomo y sus manufacturas","Lead and articles thereof"],
+ ["79","Cinc y sus manufacturas","Zinc and articles thereof"],
+ ["80","Estaño y sus manufacturas","Tin and articles thereof"],
+ ["81","Demás metales comunes; cermets","Other base metals; cermets"],
+ ["82","Herramientas y cuchillería","Tools, implements, cutlery"],
+ ["83","Manufacturas diversas de metal común","Miscellaneous articles of base metal"],
+ ["84","Reactores nucleares, calderas y máquinas","Nuclear reactors, boilers, machinery"],
+ ["85","Máquinas y aparatos eléctricos","Electrical machinery and equipment"],
+ ["86","Vehículos y material ferroviario","Railway locomotives and rolling stock"],
+ ["87","Vehículos automóviles, tractores y partes","Vehicles other than railway, and parts"],
+ ["88","Aeronaves y vehículos espaciales","Aircraft and spacecraft"],
+ ["89","Barcos y estructuras flotantes","Ships, boats and floating structures"],
+ ["90","Instrumentos de óptica, medida y médico-quirúrgicos","Optical, measuring and medical instruments"],
+ ["91","Relojería","Clocks and watches"],
+ ["92","Instrumentos musicales","Musical instruments"],
+ ["93","Armas y municiones","Arms and ammunition"],
+ ["94","Muebles; colchones; luminarias; prefabricados","Furniture; bedding; lighting; prefabricated buildings"],
+ ["95","Juguetes, juegos y artículos de deporte","Toys, games and sports requisites"],
+ ["96","Manufacturas diversas","Miscellaneous manufactured articles"],
+ ["97","Objetos de arte y antigüedades","Works of art and antiques"]
+];
+
+/* Partidas (4 dígitos) y subpartidas (6 dígitos) con productos de búsqueda.
+   [código, español, inglés, sector, palabras clave adicionales] */
+const HS_CODES = [
+ ["0201","Carne de bovino, fresca o refrigerada","Meat of bovine animals, fresh or chilled","agro","res carne beef"],
+ ["0207","Carne de aves de corral","Meat of poultry","agro","pollo chicken"],
+ ["0306","Crustáceos","Crustaceans","agro","camarón langostino shrimp"],
+ ["030617","Camarones y langostinos congelados","Frozen shrimps and prawns","agro","camarón shrimp"],
+ ["0402","Leche y nata concentradas o en polvo","Milk and cream, concentrated or powdered","food","leche en polvo milk powder"],
+ ["0409","Miel natural","Natural honey","agro","honey"],
+ ["0603","Flores y capullos cortados","Cut flowers and flower buds","flor","flores flowers"],
+ ["060311","Rosas cortadas frescas","Fresh cut roses","flor","rosas roses"],
+ ["060312","Claveles frescos","Fresh carnations","flor","clavel carnation"],
+ ["060319","Demás flores frescas (crisantemos, hortensias, alstroemerias)","Other fresh cut flowers","flor","hortensia crisantemo"],
+ ["0709","Demás hortalizas frescas","Other vegetables, fresh or chilled","agro","pimentón pimiento peppers"],
+ ["0803","Bananas y plátanos","Bananas, including plantains","agro","banano plátano"],
+ ["080390","Bananas frescas","Fresh bananas","agro","banano banana"],
+ ["0804","Dátiles, piñas, aguacates, guayabas y mangos","Dates, pineapples, avocados, guavas, mangoes","agro","piña"],
+ ["080440","Aguacates (paltas)","Avocados","agro","aguacate hass palta avocado"],
+ ["080450","Guayabas y mangos","Guavas and mangoes","agro","mango guayaba"],
+ ["0805","Agrios (cítricos)","Citrus fruit","agro","limón naranja lime lemon orange"],
+ ["0810","Demás frutas frescas","Other fresh fruit","agro","pitahaya gulupa uchuva arándano berries"],
+ ["0901","Café","Coffee","agro","café coffee"],
+ ["090111","Café sin tostar, sin descafeinar (café verde)","Coffee, not roasted, not decaffeinated (green coffee)","agro","café verde green coffee"],
+ ["090121","Café tostado, sin descafeinar","Roasted coffee, not decaffeinated","food","café tostado roasted coffee"],
+ ["0902","Té","Tea","agro","té tea"],
+ ["0904","Pimienta y ajíes secos","Pepper; dried capsicum","agro","pimienta pepper chili"],
+ ["1001","Trigo y morcajo","Wheat and meslin","agro","trigo wheat"],
+ ["1005","Maíz","Maize (corn)","agro","maíz corn"],
+ ["1006","Arroz","Rice","agro","arroz rice"],
+ ["1201","Habas de soja","Soya beans","agro","soya soy"],
+ ["1511","Aceite de palma","Palm oil","food","palma palm oil"],
+ ["151110","Aceite de palma en bruto","Crude palm oil","food","palma cruda crude palm"],
+ ["1701","Azúcar de caña o remolacha","Cane or beet sugar","food","azúcar sugar"],
+ ["170114","Azúcar de caña en bruto","Raw cane sugar","food","azúcar crudo raw sugar"],
+ ["1801","Cacao en grano","Cocoa beans","agro","cacao cocoa"],
+ ["1806","Chocolate y preparaciones con cacao","Chocolate and cocoa preparations","food","chocolate"],
+ ["2009","Jugos de frutas","Fruit juices","food","jugo zumo juice"],
+ ["2204","Vino de uvas frescas","Wine of fresh grapes","food","vino wine"],
+ ["2208","Alcohol etílico sin desnaturalizar; licores","Undenatured ethyl alcohol; spirits","food","licor spirits"],
+ ["220840","Ron y demás aguardientes de caña","Rum and other cane spirits","food","ron rum"],
+ ["2304","Tortas de soja","Soya-bean oil-cake","agro","torta soya soybean meal"],
+ ["2402","Cigarros y cigarrillos","Cigars and cigarettes","food","tabaco cigars"],
+ ["2523","Cemento","Portland cement","cons","cemento cement"],
+ ["2603","Minerales de cobre","Copper ores and concentrates","ener","cobre copper ore"],
+ ["2701","Hullas; carbón mineral","Coal","ener","carbón coal"],
+ ["270112","Hulla bituminosa","Bituminous coal","ener","carbón térmico thermal coal"],
+ ["2709","Aceites crudos de petróleo","Crude petroleum oils","ener","petróleo crudo crude oil"],
+ ["2710","Aceites de petróleo refinados (combustibles)","Refined petroleum oils (fuels)","ener","diésel gasolina diesel fuel"],
+ ["2711","Gas de petróleo e hidrocarburos gaseosos","Petroleum gases","ener","gas natural lng glp"],
+ ["271111","Gas natural licuado (GNL)","Liquefied natural gas (LNG)","ener","gnl lng"],
+ ["3004","Medicamentos dosificados","Medicaments in measured doses","chem","medicamentos medicines pharma"],
+ ["3102","Abonos minerales nitrogenados","Mineral nitrogenous fertilisers","chem","urea fertilizante fertilizer"],
+ ["3304","Productos de belleza y maquillaje","Beauty and make-up preparations","chem","cosméticos cosmetics"],
+ ["3901","Polímeros de etileno","Polymers of ethylene","plas","polietileno polyethylene"],
+ ["3923","Envases y tapas de plástico","Plastic packaging and closures","plas","empaques envases packaging"],
+ ["4011","Neumáticos nuevos de caucho","New pneumatic rubber tyres","plas","llantas tires"],
+ ["4107","Cuero preparado","Prepared leather","text","cuero leather"],
+ ["4202","Baúles, maletas, bolsos y carteras","Trunks, suitcases, handbags","text","bolsos maletas handbags"],
+ ["4407","Madera aserrada","Sawn wood","wood","madera lumber"],
+ ["4819","Cajas y envases de papel o cartón","Cartons and boxes of paper","wood","cajas cartón boxes"],
+ ["5201","Algodón sin cardar ni peinar","Cotton, not carded or combed","text","algodón cotton"],
+ ["6109","Camisetas de punto","T-shirts, knitted","text","camisetas t-shirts"],
+ ["6110","Suéteres y chalecos de punto","Jerseys and pullovers, knitted","text","suéter sweater"],
+ ["6203","Trajes y pantalones para hombre","Men's suits and trousers","text","pantalones jeans"],
+ ["6204","Trajes, vestidos y faldas para mujer","Women's suits, dresses and skirts","text","vestidos dresses"],
+ ["6212","Sostenes, fajas y corsés","Brassieres, girdles and corsets","text","fajas shapewear brasieres"],
+ ["6403","Calzado con parte superior de cuero","Footwear with leather uppers","text","zapatos calzado shoes"],
+ ["6907","Baldosas y placas cerámicas","Ceramic flags and tiles","cons","baldosas pisos tiles"],
+ ["7102","Diamantes","Diamonds","metl","diamantes diamonds"],
+ ["7103","Piedras preciosas (excepto diamantes)","Precious stones (other than diamonds)","metl","esmeraldas emeralds"],
+ ["7108","Oro en bruto o semilabrado","Gold, unwrought or semi-manufactured","metl","oro gold"],
+ ["710812","Oro en bruto (no monetario)","Gold, unwrought, non-monetary","metl","oro gold bullion"],
+ ["7113","Artículos de joyería","Articles of jewellery","metl","joyas jewelry"],
+ ["7208","Productos laminados planos de hierro o acero","Flat-rolled iron or steel","metl","acero steel"],
+ ["7403","Cobre refinado","Refined copper","metl","cobre cátodos copper cathodes"],
+ ["7601","Aluminio en bruto","Unwrought aluminium","metl","aluminio aluminum"],
+ ["8471","Máquinas para procesamiento de datos (computadores)","Automatic data-processing machines","mach","computadores laptops computers"],
+ ["8481","Válvulas y grifería","Taps, cocks and valves","mach","válvulas valves"],
+ ["8517","Teléfonos y equipos de telecomunicación","Telephones and telecom equipment","mach","celulares phones"],
+ ["851713","Teléfonos inteligentes","Smartphones","mach","smartphone celular"],
+ ["8541","Semiconductores y celdas fotovoltaicas","Semiconductors and photovoltaic cells","mach","paneles solares solar panels"],
+ ["854143","Módulos fotovoltaicos (paneles solares)","Photovoltaic modules (solar panels)","ener","paneles solares solar"],
+ ["8544","Cables y conductores eléctricos aislados","Insulated wire and cable","mach","cables wire"],
+ ["8703","Automóviles de turismo","Motor cars for passengers","auto","carros autos cars"],
+ ["8708","Partes y accesorios de vehículos","Parts and accessories of vehicles","auto","autopartes auto parts"],
+ ["9018","Instrumentos y aparatos de medicina","Medical and surgical instruments","med","equipos médicos medical devices"],
+ ["9021","Artículos de ortopedia y prótesis","Orthopaedic appliances and prostheses","med","prótesis ortopedia"],
+ ["9403","Demás muebles","Other furniture","cons","muebles furniture"],
+ ["9506","Artículos para deporte","Sports equipment","cons","deportes sports"]
+];
+
+/* Especialización exportadora / importadora de demostración por país
+   (partidas en las que se concentran las empresas de ejemplo). */
+const SPEC = {
+  CO:{ s:["090111","060311","060319","080390","080440","2709","270112","7103","6212","1701","151110","1801"], b:["8471","3004","8703","1005","2710","8517"] },
+  BR:{ s:["1201","090111","1701","0201","2709","2304","0207","1005"], b:["3102","8471","2710","3004"] },
+  AR:{ s:["2304","1201","0201","2204","1001","1005"], b:["8703","3004","2711"] },
+  CL:{ s:["7403","2603","0810","2204","0805"], b:["2709","8703","8517"] },
+  PE:{ s:["2603","7108","080440","0810","090111","030617"], b:["2710","8471","1005"] },
+  EC:{ s:["080390","030617","0603","1801","2709"], b:["2710","3004","8703"] },
+  MX:{ s:["8703","8708","8471","080440","2208","0709"], b:["1005","2710","8541","3901"] },
+  GT:{ s:["090111","080390","1701","0904"], b:["2710","3004"] },
+  CR:{ s:["9018","080390","0804","9021"], b:["2710","8471"] },
+  HN:{ s:["090111","6109","080390"], b:["2710","5201"] },
+  PA:{ s:["080390","030617"], b:["2710","8703"] },
+  DO:{ s:["9018","2402","1801","7108"], b:["2710","1005"] },
+  US:{ s:["2711","1005","1201","8471","9018","2710","3004"], b:["0901","080440","0603","8703","8517","2709","6109"] },
+  CA:{ s:["2709","1001","4407","7601","2711"], b:["8703","080440","0901","8517"] },
+  CN:{ s:["8517","851713","8471","854143","6109","9403","9506","3923","8544"], b:["2709","1201","2603","2701","7403","1511"] },
+  JP:{ s:["8703","8708","8481","9018"], b:["2711","2709","0901","0201","1005"] },
+  KR:{ s:["8541","8703","8517","3901"], b:["2709","2711","2603","1005"] },
+  VN:{ s:["851713","6403","6109","0901","1006","030617"], b:["5201","8541","3901"] },
+  TH:{ s:["1006","8703","4011","1701"], b:["2709","8541"] },
+  ID:{ s:["151110","2701","1801","4011"], b:["1001","2710","3004"] },
+  MY:{ s:["1511","8541","4011"], b:["2710","1005"] },
+  SG:{ s:["2710","8541","3004"], b:["2709","8471"] },
+  PH:{ s:["8541","080390","2009"], b:["1006","2710"] },
+  IN:{ s:["3004","1006","7102","7113","2710","5201","6204"], b:["2709","2711","7108","1511","8517"] },
+  BD:{ s:["6109","6110","6203","6204"], b:["5201","2710"] },
+  PK:{ s:["1006","6203","5201","6109"], b:["2709","1511"] },
+  LK:{ s:["0902","6212","4011"], b:["2710","1001"] },
+  AE:{ s:["2709","2710","7108","7601"], b:["7108","8517","0201","0603","080390"] },
+  SA:{ s:["2709","3901","3102"], b:["8703","1006","0201"] },
+  TR:{ s:["8703","6109","7208","0810"], b:["2709","7208","5201"] },
+  IL:{ s:["9018","3004","8541"], b:["2709","1001"] },
+  QA:{ s:["271111","3102"], b:["0201","8703"] },
+  DE:{ s:["8703","8708","3004","8481","9018"], b:["0901","2711","8471","0603","1801"] },
+  FR:{ s:["2204","3304","8802","3004"], b:["2709","080440","0803"] },
+  NL:{ s:["0603","2711","8541","0402"], b:["0603","080440","1801","0901","1201"] },
+  BE:{ s:["3004","7102","1806"], b:["1801","2709"] },
+  CH:{ s:["3004","7108","9018"], b:["7108","1801","0901"] },
+  AT:{ s:["8708","4407"], b:["0901","2711"] },
+  GB:{ s:["3004","2208","8703"], b:["0603","080390","0901","8471"] },
+  IE:{ s:["3004","9018","0402"], b:["8703","2710"] },
+  SE:{ s:["8703","4407","9018"], b:["2709","0901"] },
+  NO:{ s:["2709","2711","0306"], b:["8703","0901"] },
+  DK:{ s:["3004","0201","8502"], b:["0901","2710"] },
+  FI:{ s:["4819","4407"], b:["2709","0901"] },
+  ES:{ s:["8703","0805","2204","1511"], b:["2709","0901","1801","080440"] },
+  IT:{ s:["8481","2204","6403","4202","3304"], b:["2709","0901","1801","0201"] },
+  PT:{ s:["6403","4502","2204"], b:["2709","0901"] },
+  GR:{ s:["1511","2710"], b:["2709","0901"] },
+  PL:{ s:["8708","9403","0207"], b:["2709","0901"] },
+  CZ:{ s:["8703","8708"], b:["2711","0901"] },
+  RO:{ s:["8544","1001"], b:["2711","3004"] },
+  HU:{ s:["8703","3004"], b:["2711","0901"] },
+  UA:{ s:["1001","1005","1511","7208"], b:["2710","8703"] },
+  AU:{ s:["2701","2603","2711","0201","7108"], b:["8703","2710","0901"] },
+  NZ:{ s:["0402","0201","4407"], b:["8703","2710"] },
+  ZA:{ s:["7108","2701","0805","8703"], b:["2709","1006"] },
+  NG:{ s:["2709","1801"], b:["1001","2710","8703"] },
+  GH:{ s:["7108","1801","2709"], b:["1006","2710"] },
+  CI:{ s:["1801","1806","7108"], b:["1006","2710"] },
+  KE:{ s:["0902","0603","060311"], b:["2710","1511"] },
+  ET:{ s:["090111","0603"], b:["2710","1001"] },
+  EG:{ s:["2711","0805","3102"], b:["1001","1005"] },
+  MA:{ s:["3102","8708","0709"], b:["2710","1001"] },
+  KZ:{ s:["2709","1001","7403"], b:["8703","8471"] },
+  UZ:{ s:["5201","7108"], b:["8703","3004"] }
+};
+
+/* ================================================================
+   GLOBAL TRADE FINDER — núcleo: idioma, datos, estado y búsqueda
+   ================================================================ */
+const SG = { mail:"contacto@skynetgenesis.com", wa:"3044375758", waIntl:"573044375758" };
+const CATALOG_URL = "https://skynetgenesis.com/#contratar-global-trade-finder";
+const FRAMED = (() => { try { return window.self !== window.top; } catch(e){ return true; } })();
+
+/* ---------- Almacenamiento seguro ---------- */
+const MEM = {};
+const store = {
+  get(k, d){ try { const v = localStorage.getItem("gtf-"+k); return v==null ? (k in MEM ? MEM[k] : d) : JSON.parse(v); } catch(e){ return k in MEM ? MEM[k] : d; } },
+  set(k, v){ MEM[k] = v; try { localStorage.setItem("gtf-"+k, JSON.stringify(v)); } catch(e){} },
+  del(k){ delete MEM[k]; try { localStorage.removeItem("gtf-"+k); } catch(e){} }
+};
+
+/* ---------- Idioma ---------- */
+let LANG = store.get("lang", (navigator.language||"es").slice(0,2)==="en" ? "en" : "es");
+const T = {
+ es:{
+  nav_search:"Buscar", nav_markets:"Mercados", nav_hs:"Códigos HS", nav_companies:"Empresas", nav_plans:"Planes", nav_account:"Mi cuenta", nav_register:"Registrar empresa",
+  demo_strip:"<b>Versión de demostración.</b> Las empresas que aparecen son ficticias y sus datos se generan para pruebas. Lo que usted registre se guarda solo en este navegador.",
+  eyebrow:"Global Trade Search & Intelligence",
+  hero_lead:"Encuentre compradores y proveedores en 90 países. Navegue de continente a país, sector, producto y código arancelario HS hasta llegar a las empresas que comercian lo que usted vende o necesita.",
+  tab_buyers:"Buscar compradores", tab_suppliers:"Buscar proveedores", tab_products:"Buscar productos", tab_markets:"Explorar mercados",
+  ph_buyers:"Producto, código HS o país. Ej.: café verde, 080440, Alemania", ph_suppliers:"¿Qué necesita comprar? Ej.: paneles solares, 6212, Vietnam", ph_products:"Nombre del producto o código HS. Ej.: aguacate, 0901", ph_markets:"País o región. Ej.: Países Bajos, Sudeste Asiático",
+  btn_search:"Buscar", popular:"Búsquedas frecuentes:",
+  path_title:"Ruta de navegación", lv_cont:"Continente", lv_sub:"Subregión", lv_country:"País", lv_sector:"Sector", lv_product:"Producto", lv_hs:"Código HS", lv_comp:"Empresas",
+  st_countries:"países y territorios", st_chapters:"capítulos del Sistema Armonizado", st_codes:"partidas y subpartidas con empresas", st_companies:"empresas de demostración",
+  sec_continents:"Explore por continente", sec_featured:"Mercados destacados", sec_popular_hs:"Productos más buscados",
+  buyers:"Compradores", suppliers:"Proveedores", buyer:"Comprador", supplier:"Proveedor", both:"Comprador y proveedor", companies:"Empresas",
+  countries:"países", subregions:"subregiones",
+  results:"Resultados", results_for:"para", no_results:"No encontramos resultados", no_results_hint:"Pruebe con otra palabra, un código HS más corto (por ejemplo 0901 en vez de 090111) o quite filtros.",
+  filters:"Filtros", f_region:"Continente", f_sub:"Subregión", f_country:"País", f_sector:"Sector", f_hs:"Código HS", f_role:"Perfil", f_verified:"Solo empresas verificadas", f_all:"Todos", f_clear:"Limpiar filtros", f_sort:"Ordenar",
+  sort_rel:"Relevancia", sort_name:"Nombre", sort_active:"Actividad reciente", sort_size:"Tamaño",
+  save_search:"Guardar búsqueda", saved_ok:"Búsqueda guardada en Mi cuenta", export:"Exportar", create_alert:"Crear alerta",
+  view_profile:"Ver perfil", verified:"Verificada", demo:"Demo", yours:"Su empresa",
+  founded:"Fundada", employees:"Empleados", volume:"Volumen anual", active:"Activa hace", days:"días", today:"hoy",
+  about:"Acerca de la empresa", products:"Productos y códigos HS", markets_served:"Mercados", sourcing_from:"Compra en", selling_to:"Vende a",
+  certs:"Certificaciones", incoterms:"Incoterms habituales", contact:"Contacto", contact_dept:"Área", email:"Correo", phone:"Teléfono", website:"Sitio web",
+  locked_title:"Datos de contacto reservados para suscriptores", locked_buyers:"Para ver el contacto de compradores necesita el plan Proveedor o Comprador y proveedor.", locked_suppliers:"Para ver el contacto de proveedores necesita el plan Comprador o Comprador y proveedor.",
+  see_plans:"Ver planes", request_contact:"Solicitar contacto", send_rfq:"Enviar solicitud de cotización", send_offer:"Enviar oferta",
+  rfq_title:"Solicitud de cotización", offer_title:"Oferta comercial", rfq_product:"Producto (código HS)", rfq_qty:"Cantidad", rfq_unit:"Unidad", rfq_incoterm:"Incoterm", rfq_dest:"Puerto o ciudad de destino", rfq_msg:"Mensaje",
+  rfq_note:"En la versión de demostración la solicitud se guarda en Mi cuenta y no se envía a la empresa.", cancel:"Cancelar", save:"Guardar", close:"Cerrar", send:"Guardar solicitud",
+  rfq_ok:"Solicitud guardada en Mi cuenta", need_account:"Primero registre su empresa (es gratis) para enviar solicitudes.",
+  country_suppliers:"Proveedores en", country_buyers:"Compradores en", top_hs:"Principales códigos HS", by_sector:"Empresas por sector", select_sector:"Elija un sector", all_sectors:"Todos los sectores", products_in:"Productos en",
+  hs_title:"Sistema Armonizado (HS 2022)", hs_lead:"La clasificación internacional de mercancías de la Organización Mundial de Aduanas: 21 secciones, 96 capítulos, partidas de 4 dígitos y subpartidas de 6 dígitos. Busque un código o navegue por sección.",
+  hs_search_ph:"Código o descripción. Ej.: 0603, flores, acero", section:"Sección", chapter:"Capítulo", heading:"Partida", subheading:"Subpartida", chapters:"capítulos",
+  hs_no_codes:"Este capítulo aún no tiene partidas cargadas con empresas en la versión de demostración.", where_trade:"Dónde se comercia", world:"Mundo", companies_with:"empresas con este código",
+  markets_title:"Mercados del mundo", markets_lead:"Elija un continente, luego la subregión y el país para ver sus compradores y proveedores por sector y producto.",
+  dir_title:"Directorio de empresas", dir_lead:"Compradores y proveedores registrados. Use los filtros para encontrar socios por país, sector y código HS.",
+  plans_title:"Planes de suscripción", plans_lead:"Regístrese gratis como comprador, proveedor o ambos. Suscríbase para ver contactos, enviar solicitudes sin límite y recibir alertas de oportunidades.",
+  plan_free:"Registro gratuito", plan_free_who:"Para conocer la plataforma", plan_buyer_who:"Encuentre proveedores", plan_supplier_who:"Encuentre compradores", plan_both_who:"Acceso completo",
+  price_free:"Gratis", price_quote:"Precio en skynetgenesis.com", recommended:"Recomendado", current:"Plan actual",
+  pf1:"Buscador y navegación por mercados y códigos HS", pf2:"Perfil de su empresa en el directorio", pf3:"3 solicitudes al mes", pf4:"1 alerta",
+  pb1:"Contacto completo de proveedores", pb2:"Solicitudes de cotización sin límite", pb3:"10 alertas de nuevos proveedores", pb4:"Exportación de resultados",
+  ps1:"Contacto completo de compradores", ps2:"Perfil destacado en las búsquedas", ps3:"10 alertas de nuevos compradores", ps4:"Ofertas comerciales sin límite",
+  pa1:"Todo lo de Comprador y Proveedor", pa2:"Alertas ilimitadas", pa3:"Informes por país y código HS", pa4:"Varios usuarios por empresa",
+  hire:"Contratar", try_demo:"Probar este plan (demo)", demo_plan_on:"Plan de demostración activado:", using_free:"Está usando el registro gratuito.",
+  reg_title:"Registrar empresa", reg_edit:"Editar mi empresa", reg_lead:"Su empresa aparecerá en el directorio y podrá buscar, guardar búsquedas, crear alertas y enviar solicitudes.",
+  reg_profile:"¿Cómo participa en el comercio internacional?", reg_buyer_d:"Importa o compra insumos y productos", reg_supplier_d:"Exporta o vende productos", reg_both_d:"Compra y vende",
+  r_name:"Nombre de la empresa", r_taxid:"Identificación tributaria (NIT, RUT, VAT…)", r_country:"País", r_city:"Ciudad", r_sector:"Sector principal", r_hs:"Productos o códigos HS", r_hs_ph:"Escriba y elija. Ej.: café, 0901", r_web:"Sitio web", r_contact:"Persona de contacto", r_role:"Cargo", r_email:"Correo", r_phone:"Teléfono / WhatsApp", r_desc:"Descripción breve", r_markets:"Mercados de interés", r_accept:"Acepto los términos de uso y autorizo el tratamiento de los datos de mi empresa.",
+  r_save:"Guardar empresa", r_saved:"Empresa registrada. Ya aparece en el directorio.", r_updated:"Datos actualizados", choose:"Elija…",
+  err_req:"Este dato es obligatorio", err_email:"Escriba un correo válido, por ejemplo ventas@empresa.com", err_hs:"Agregue al menos un producto o código HS", err_accept:"Debe aceptar para continuar", err_profile:"Elija un perfil",
+  acc_title:"Mi cuenta", acc_none:"Aún no ha registrado su empresa", acc_none_d:"El registro es gratis y toma dos minutos.", my_company:"Mi empresa", my_plan:"Mi plan", saved_searches:"Búsquedas guardadas", alerts:"Alertas", requests:"Solicitudes enviadas",
+  none_saved:"Todavía no tiene búsquedas guardadas.", none_alerts:"Todavía no tiene alertas.", none_requests:"Todavía no ha enviado solicitudes.",
+  run:"Abrir", del:"Eliminar", edit:"Editar", logout:"Salir de esta cuenta", logout_confirm:"¿Seguro? Se borrarán de este navegador su empresa, búsquedas, alertas y solicitudes.", yes_delete:"Sí, borrar", matches_now:"coincidencias hoy",
+  alert_title:"Nueva alerta", alert_lead:"Le avisaremos cuando aparezcan empresas nuevas que coincidan.", alert_what:"Buscar", alert_name:"Nombre de la alerta", alert_freq:"Frecuencia", daily:"Diaria", weekly:"Semanal", alert_ok:"Alerta creada", alert_limit:"Llegó al límite de alertas de su plan.",
+  limit_req:"Llegó al límite de 3 solicitudes del registro gratuito este mes.",
+  export_title:"Exportar resultados", export_lead:"Vista previa del informe. Incluye hasta 200 filas.", copy:"Copiar tabla", copied:"Tabla copiada", download_csv:"Descargar CSV", print:"Imprimir o guardar PDF",
+  export_locked:"La exportación está incluida en los planes de suscripción.", generated:"Generado", report_by:"Informe generado por Global Trade Finder, una aplicación de SkyNet Genesis",
+  footer:"© {y} Global Trade Finder · Una aplicación de SkyNet Genesis · contacto@skynetgenesis.com · WhatsApp 304 437 5758", terms:"Términos", privacy:"Datos personales", support:"Soporte",
+  back:"Volver", home:"Inicio", all:"Todos", more:"Ver más", showing:"Mostrando", of:"de",
+  terms_title:"Términos de uso", privacy_title:"Tratamiento de datos personales",
+  emp_1:"1 a 10", emp_2:"11 a 50", emp_3:"51 a 200", emp_4:"201 a 1.000", emp_5:"Más de 1.000",
+  vol_1:"Menos de US$ 500 mil", vol_2:"US$ 500 mil a 2 millones", vol_3:"US$ 2 a 10 millones", vol_4:"US$ 10 a 50 millones", vol_5:"Más de US$ 50 millones",
+  d_sup:"Empresa {sec} de {city}, {country}. Exporta {prod} a {mk}. Trabaja con {inc}.",
+  d_buy:"Empresa {sec} de {city}, {country}. Importa {prod} con compras recurrentes. Busca proveedores con {cert}.",
+  d_both:"Empresa {sec} de {city}, {country}. Comercializa {prod} y compra insumos en el exterior.",
+  dept_sup:"Gerencia comercial de exportaciones", dept_buy:"Departamento de compras internacionales",
+  ent_kind:"del sector"
+ },
+ en:{
+  nav_search:"Search", nav_markets:"Markets", nav_hs:"HS codes", nav_companies:"Companies", nav_plans:"Plans", nav_account:"My account", nav_register:"List your company",
+  demo_strip:"<b>Demo version.</b> The companies shown are fictitious and generated for testing. Anything you register is saved only in this browser.",
+  eyebrow:"Global Trade Search & Intelligence",
+  hero_lead:"Find buyers and suppliers in 90 countries. Drill down from continent to country, sector, product and HS tariff code until you reach the companies trading what you sell or need.",
+  tab_buyers:"Find buyers", tab_suppliers:"Find suppliers", tab_products:"Find products", tab_markets:"Explore markets",
+  ph_buyers:"Product, HS code or country. E.g. green coffee, 080440, Germany", ph_suppliers:"What do you need to buy? E.g. solar panels, 6212, Vietnam", ph_products:"Product name or HS code. E.g. avocado, 0901", ph_markets:"Country or region. E.g. Netherlands, South-eastern Asia",
+  btn_search:"Search", popular:"Popular searches:",
+  path_title:"Navigation path", lv_cont:"Continent", lv_sub:"Subregion", lv_country:"Country", lv_sector:"Sector", lv_product:"Product", lv_hs:"HS code", lv_comp:"Companies",
+  st_countries:"countries and territories", st_chapters:"Harmonized System chapters", st_codes:"headings and subheadings with companies", st_companies:"demo companies",
+  sec_continents:"Explore by continent", sec_featured:"Featured markets", sec_popular_hs:"Most searched products",
+  buyers:"Buyers", suppliers:"Suppliers", buyer:"Buyer", supplier:"Supplier", both:"Buyer & supplier", companies:"Companies",
+  countries:"countries", subregions:"subregions",
+  results:"Results", results_for:"for", no_results:"No results found", no_results_hint:"Try another word, a shorter HS code (e.g. 0901 instead of 090111) or remove filters.",
+  filters:"Filters", f_region:"Continent", f_sub:"Subregion", f_country:"Country", f_sector:"Sector", f_hs:"HS code", f_role:"Profile", f_verified:"Verified companies only", f_all:"All", f_clear:"Clear filters", f_sort:"Sort by",
+  sort_rel:"Relevance", sort_name:"Name", sort_active:"Recent activity", sort_size:"Size",
+  save_search:"Save search", saved_ok:"Search saved to My account", export:"Export", create_alert:"Create alert",
+  view_profile:"View profile", verified:"Verified", demo:"Demo", yours:"Your company",
+  founded:"Founded", employees:"Employees", volume:"Annual volume", active:"Active", days:"days ago", today:"today",
+  about:"About the company", products:"Products and HS codes", markets_served:"Markets", sourcing_from:"Sources from", selling_to:"Sells to",
+  certs:"Certifications", incoterms:"Usual Incoterms", contact:"Contact", contact_dept:"Department", email:"Email", phone:"Phone", website:"Website",
+  locked_title:"Contact details are for subscribers", locked_buyers:"To see buyer contacts you need the Supplier or Buyer & supplier plan.", locked_suppliers:"To see supplier contacts you need the Buyer or Buyer & supplier plan.",
+  see_plans:"See plans", request_contact:"Request contact", send_rfq:"Send request for quotation", send_offer:"Send offer",
+  rfq_title:"Request for quotation", offer_title:"Commercial offer", rfq_product:"Product (HS code)", rfq_qty:"Quantity", rfq_unit:"Unit", rfq_incoterm:"Incoterm", rfq_dest:"Destination port or city", rfq_msg:"Message",
+  rfq_note:"In the demo version the request is saved to My account and is not sent to the company.", cancel:"Cancel", save:"Save", close:"Close", send:"Save request",
+  rfq_ok:"Request saved to My account", need_account:"List your company first (it's free) to send requests.",
+  country_suppliers:"Suppliers in", country_buyers:"Buyers in", top_hs:"Top HS codes", by_sector:"Companies by sector", select_sector:"Choose a sector", all_sectors:"All sectors", products_in:"Products in",
+  hs_title:"Harmonized System (HS 2022)", hs_lead:"The World Customs Organization's international goods classification: 21 sections, 96 chapters, 4-digit headings and 6-digit subheadings. Search a code or browse by section.",
+  hs_search_ph:"Code or description. E.g. 0603, flowers, steel", section:"Section", chapter:"Chapter", heading:"Heading", subheading:"Subheading", chapters:"chapters",
+  hs_no_codes:"This chapter has no headings with companies in the demo version yet.", where_trade:"Where it is traded", world:"World", companies_with:"companies with this code",
+  markets_title:"World markets", markets_lead:"Choose a continent, then the subregion and country to see its buyers and suppliers by sector and product.",
+  dir_title:"Company directory", dir_lead:"Registered buyers and suppliers. Use the filters to find partners by country, sector and HS code.",
+  plans_title:"Subscription plans", plans_lead:"List your company for free as a buyer, supplier or both. Subscribe to see contacts, send unlimited requests and get opportunity alerts.",
+  plan_free:"Free listing", plan_free_who:"Get to know the platform", plan_buyer_who:"Find suppliers", plan_supplier_who:"Find buyers", plan_both_who:"Full access",
+  price_free:"Free", price_quote:"Price at skynetgenesis.com", recommended:"Recommended", current:"Current plan",
+  pf1:"Search and browse markets and HS codes", pf2:"Your company profile in the directory", pf3:"3 requests per month", pf4:"1 alert",
+  pb1:"Full supplier contact details", pb2:"Unlimited requests for quotation", pb3:"10 new-supplier alerts", pb4:"Export results",
+  ps1:"Full buyer contact details", ps2:"Featured profile in searches", ps3:"10 new-buyer alerts", ps4:"Unlimited commercial offers",
+  pa1:"Everything in Buyer and Supplier", pa2:"Unlimited alerts", pa3:"Reports by country and HS code", pa4:"Multiple users per company",
+  hire:"Subscribe", try_demo:"Try this plan (demo)", demo_plan_on:"Demo plan active:", using_free:"You are on the free listing.",
+  reg_title:"List your company", reg_edit:"Edit my company", reg_lead:"Your company will appear in the directory and you can search, save searches, create alerts and send requests.",
+  reg_profile:"How do you take part in international trade?", reg_buyer_d:"You import or buy products and inputs", reg_supplier_d:"You export or sell products", reg_both_d:"You buy and sell",
+  r_name:"Company name", r_taxid:"Tax ID (NIT, RUT, VAT…)", r_country:"Country", r_city:"City", r_sector:"Main sector", r_hs:"Products or HS codes", r_hs_ph:"Type and choose. E.g. coffee, 0901", r_web:"Website", r_contact:"Contact person", r_role:"Job title", r_email:"Email", r_phone:"Phone / WhatsApp", r_desc:"Short description", r_markets:"Target markets", r_accept:"I accept the terms of use and authorize the processing of my company's data.",
+  r_save:"Save company", r_saved:"Company listed. It now appears in the directory.", r_updated:"Details updated", choose:"Choose…",
+  err_req:"This field is required", err_email:"Enter a valid email, e.g. sales@company.com", err_hs:"Add at least one product or HS code", err_accept:"You must accept to continue", err_profile:"Choose a profile",
+  acc_title:"My account", acc_none:"You haven't listed your company yet", acc_none_d:"Listing is free and takes two minutes.", my_company:"My company", my_plan:"My plan", saved_searches:"Saved searches", alerts:"Alerts", requests:"Sent requests",
+  none_saved:"No saved searches yet.", none_alerts:"No alerts yet.", none_requests:"No requests sent yet.",
+  run:"Open", del:"Delete", edit:"Edit", logout:"Leave this account", logout_confirm:"Are you sure? Your company, searches, alerts and requests will be erased from this browser.", yes_delete:"Yes, erase", matches_now:"matches today",
+  alert_title:"New alert", alert_lead:"We'll notify you when new companies match.", alert_what:"Look for", alert_name:"Alert name", alert_freq:"Frequency", daily:"Daily", weekly:"Weekly", alert_ok:"Alert created", alert_limit:"You've reached your plan's alert limit.",
+  limit_req:"You've reached the free listing's 3 requests this month.",
+  export_title:"Export results", export_lead:"Report preview. Includes up to 200 rows.", copy:"Copy table", copied:"Table copied", download_csv:"Download CSV", print:"Print or save PDF",
+  export_locked:"Export is included in the subscription plans.", generated:"Generated", report_by:"Report generated by Global Trade Finder, a SkyNet Genesis application",
+  footer:"© {y} Global Trade Finder · A SkyNet Genesis application · contacto@skynetgenesis.com · WhatsApp +57 304 437 5758", terms:"Terms", privacy:"Personal data", support:"Support",
+  back:"Back", home:"Home", all:"All", more:"See more", showing:"Showing", of:"of",
+  terms_title:"Terms of use", privacy_title:"Personal data policy",
+  emp_1:"1 to 10", emp_2:"11 to 50", emp_3:"51 to 200", emp_4:"201 to 1,000", emp_5:"Over 1,000",
+  vol_1:"Under US$ 500k", vol_2:"US$ 500k to 2M", vol_3:"US$ 2M to 10M", vol_4:"US$ 10M to 50M", vol_5:"Over US$ 50M",
+  d_sup:"{sec} company based in {city}, {country}. Exports {prod} to {mk}. Works with {inc}.",
+  d_buy:"{sec} company based in {city}, {country}. Imports {prod} on a recurring basis. Looking for suppliers with {cert}.",
+  d_both:"{sec} company based in {city}, {country}. Trades {prod} and sources inputs abroad.",
+  dept_sup:"Export sales management", dept_buy:"International purchasing department",
+  ent_kind:"sector"
+ }
+};
+const t = (k, vars) => { let s = (T[LANG][k] ?? T.es[k] ?? k); if(vars) for(const v in vars) s = s.replaceAll("{"+v+"}", vars[v]); return s; };
+let RN = null;
+const cname = (cc) => { try { if(!RN || RN.lang!==LANG){ RN = new Intl.DisplayNames([LANG],{type:"region"}); RN.lang = LANG; } return RN.of(cc) || cc; } catch(e){ return cc; } };
+const L = (o) => o ? (o[LANG] || o.es) : "";
+const fmt = (n) => Number(n).toLocaleString(LANG==="en"?"en-US":"es-CO");
+
+/* ---------- Utilidades ---------- */
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm = (s) => String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").trim();
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
+function mulberry32(a){ return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; let t2 = Math.imul(a ^ a >>> 15, 1 | a); t2 = t2 + Math.imul(t2 ^ t2 >>> 7, 61 | t2) ^ t2; return ((t2 ^ t2 >>> 14) >>> 0) / 4294967296; }; }
+const hashStr = (s) => { let h = 2166136261; for(const ch of s){ h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
+const pick = (r, arr) => arr[Math.floor(r()*arr.length)];
+
+/* ---------- Índices de geografía y HS ---------- */
+const COUNTRY = {};   // cc -> {cc, sub, cont}
+const SUB = {}; const CONT = {};
+GEO.forEach(ct => { CONT[ct.id] = ct; ct.subs.forEach(s => { SUB[s.id] = {...s, cont:ct.id}; s.c.forEach(cc => COUNTRY[cc] = {cc, sub:s.id, cont:ct.id}); }); });
+const ALL_CC = Object.keys(COUNTRY);
+const SECTOR = Object.fromEntries(SECTORS.map(s => [s.id, s]));
+const CHAP = Object.fromEntries(HS_CHAPTERS.map(c => [c[0], {code:c[0], es:c[1], en:c[2]}]));
+const CODE = {};
+HS_CODES.forEach(c => CODE[c[0]] = {code:c[0], es:c[1], en:c[2], sector:c[3], kw:c[4]||""});
+const sectionOf = (ch) => { const n = parseInt(ch,10); return HS_SECTIONS.find(s => n>=s.ch[0] && n<=s.ch[1]); };
+const codeLabel = (code) => CODE[code] ? L(CODE[code]) : (code.length===2 && CHAP[code] ? L(CHAP[code]) : code);
+const fmtCode = (c) => c.length===6 ? c.slice(0,4)+"."+c.slice(4) : c;
+const codeLevel = (c) => c.length===2 ? t("chapter") : c.length===4 ? t("heading") : t("subheading");
+/* un código "cubre" a otro si es prefijo (0901 cubre 090111) o al revés */
+const related = (a, b) => a.startsWith(b) || b.startsWith(a);
+
+/* ---------- Empresas de demostración ---------- */
+const ES_CC = new Set(["CO","MX","GT","HN","SV","CR","PA","DO","PR","AR","CL","PE","EC","UY","PY","BO","ES"]);
+const PRE_ES = ["Andes","Pacífico","Cóndor","Horizonte","Vértice","Cumbre","Bahía","Altiplano","Sierra Alta","Costa Azul","Brisa","Terranova","Zenit","Aldea","Puerto Real","Caribe Sur","Estrella","Nevado","Ceiba","Guayacán","Palmar","Llanura","Arrecife","Monteverde"];
+const PRE_EN = ["Atlas","Meridian","Aurora","Delta","Northgate","Vertex","Orion","Harbor","Summit","Lotus","Zenith","Silverline","Keystone","Sunrise","Granite","Oakridge","Bluewave","Pioneer","Evergreen","Crestline","Riverton","Halcyon","Lighthouse","Cobalt"];
+const CORE = {
+  agro:{es:["Agro","Frutas Frescas","Cafés de Origen","Cosechas"],en:["Agri","Fresh Produce","Coffee Traders","Harvest"]},
+  food:{es:["Alimentos","Food Group","Ingredientes"],en:["Foods","Ingredients","Food Group"]},
+  flor:{es:["Flores","Floricultura","Blooms"],en:["Flowers","Blooms","Floral"]},
+  ener:{es:["Energía","Minerales","Recursos"],en:["Energy","Resources","Minerals"]},
+  chem:{es:["Farma","Químicos","Laboratorios"],en:["Pharma","Chemicals","Labs"]},
+  plas:{es:["Polímeros","Empaques","Plásticos"],en:["Polymers","Packaging","Plastics"]},
+  text:{es:["Textiles","Confecciones","Moda"],en:["Textiles","Apparel","Garments"]},
+  wood:{es:["Maderas","Empaques","Papeles"],en:["Timber","Packaging","Paper"]},
+  metl:{es:["Metales","Minería","Gemas"],en:["Metals","Mining","Gems"]},
+  mach:{es:["Tecnología","Maquinaria","Electrónica"],en:["Technologies","Machinery","Electronics"]},
+  auto:{es:["Autopartes","Motores"],en:["Auto Parts","Motors","Automotive"]},
+  med:{es:["Médica","Dispositivos Médicos"],en:["Medical","MedTech"]},
+  cons:{es:["Materiales","Hogar y Construcción"],en:["Building Supplies","Home & Living"]}
+};
+const BUY_WORD = {es:["Importadora","Distribuidora","Comercializadora"], en:["Imports","Trading","Distribution"]};
+const CERTS = {
+  agro:["GlobalG.A.P.","Rainforest Alliance","Fairtrade","Orgánico USDA","BASC"], food:["HACCP","ISO 22000","FSSC 22000","BRCGS","Halal","Kosher"],
+  flor:["Florverde","Rainforest Alliance","MPS-ABC"], ener:["ISO 14001","ISO 45001","IRMA"], chem:["BPM / GMP","ISO 9001","FDA registrada","INVIMA"],
+  plas:["ISO 9001","ISO 14001"], text:["WRAP","OEKO-TEX","BSCI","ISO 9001"], wood:["FSC","PEFC","ISO 9001"], metl:["LBMA","RJC","ISO 9001"],
+  mach:["CE","ISO 9001","UL","RoHS"], auto:["IATF 16949","ISO 9001"], med:["ISO 13485","CE","FDA registrada","INVIMA"], cons:["ISO 9001","CE"]
+};
+const CITY = { CO:["Bogotá","Medellín","Barranquilla","Cartagena","Santa Marta","Cali","Bucaramanga","Rionegro"], BR:["São Paulo","Santos","Rio de Janeiro","Curitiba"], AR:["Buenos Aires","Rosario","Córdoba"], CL:["Santiago","Valparaíso","Antofagasta"], PE:["Lima","Callao","Arequipa"], EC:["Guayaquil","Quito","Machala"], MX:["Ciudad de México","Monterrey","Guadalajara","Querétaro"], US:["Miami","Houston","Los Angeles","New York","Chicago"], CA:["Toronto","Vancouver","Montréal"], CN:["Shenzhen","Shanghai","Ningbo","Guangzhou"], JP:["Tokyo","Osaka","Yokohama"], KR:["Seoul","Busan","Incheon"], DE:["Hamburg","Frankfurt","Munich","Bremen"], NL:["Rotterdam","Amsterdam","Aalsmeer"], ES:["Madrid","Valencia","Barcelona","Algeciras"], IT:["Milano","Genova","Torino"], FR:["Paris","Marseille","Le Havre"], GB:["London","Manchester","Felixstowe"], IN:["Mumbai","Chennai","Ahmedabad","New Delhi"], AE:["Dubai","Abu Dhabi","Sharjah"], VN:["Ho Chi Minh City","Hanoi","Hai Phong"], AU:["Sydney","Melbourne","Perth"], ZA:["Johannesburg","Durban","Cape Town"], TR:["Istanbul","Izmir","Mersin"] };
+const INCOS = ["EXW","FCA","FOB","CFR","CIF","DAP","DDP"];
+
+function genCompanies(){
+  const out = []; let id = 1;
+  const validCodes = Object.keys(CODE);
+  ALL_CC.forEach(cc => {
+    const r = mulberry32(hashStr("gtf-"+cc));
+    const sp = SPEC[cc]; const sCodes = (sp?.s||[]).filter(c=>CODE[c]); const bCodes = (sp?.b||[]).filter(c=>CODE[c]);
+    const n = cc==="CO" ? 22 : (sp ? 9 : 3) + Math.floor(r()*(sp?7:3));
+    const used = new Set();
+    for(let i=0;i<n;i++){
+      let role = r() < 0.2 ? "both" : (r() < (sCodes.length/(sCodes.length+bCodes.length+0.01) || 0.5) ? "supplier" : "buyer");
+      if(!sp) role = pick(r,["supplier","buyer","both"]);
+      const pool = role==="buyer" ? (bCodes.length?bCodes:validCodes) : role==="supplier" ? (sCodes.length?sCodes:validCodes) : [...sCodes, ...bCodes].length ? [...sCodes,...bCodes] : validCodes;
+      const k = 1 + Math.floor(r()*3); const codes = [];
+      for(let j=0;j<k*3 && codes.length<k;j++){ const c = pick(r,pool); if(!codes.some(x=>related(x,c))) codes.push(c); }
+      const sector = CODE[codes[0]].sector;
+      const es = ES_CC.has(cc); const lg = es ? "es" : "en";
+      let name, tries = 0;
+      do {
+        const pre = pick(r, es?PRE_ES:PRE_EN), core = pick(r, CORE[sector][lg]);
+        name = role==="buyer" && r()<0.6 ? (es ? `${pick(r,BUY_WORD.es)} ${pre} ${core}` : `${pre} ${core} ${pick(r,BUY_WORD.en)}`) : `${pre} ${core}`;
+        name += " " + (LEGAL[cc]||"Ltd.");
+        tries++;
+      } while(used.has(name) && tries<10);
+      used.add(name);
+      const city = pick(r, CITY[cc] || [null]) ;
+      const mkPool = role==="buyer" ? ALL_CC.filter(x => SPEC[x]?.s?.some(c => codes.some(cd=>related(cd,c)))) : ALL_CC.filter(x => SPEC[x]?.b?.some(c => codes.some(cd=>related(cd,c))));
+      const markets = [...new Set(Array.from({length:2+Math.floor(r()*3)},()=> pick(r, mkPool.length?mkPool:ALL_CC)))].filter(x=>x!==cc);
+      const certPool = CERTS[sector]; const certs = [...new Set([pick(r,certPool), pick(r,certPool)])];
+      const inc = [...new Set([pick(r,INCOS.slice(1,6)), pick(r,INCOS)])];
+      const slug = norm(name).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").split("-").slice(0,3).join("-");
+      out.push({ id:"d"+(id++), demo:true, name, cc, city, role, codes, sector,
+        founded: 1972 + Math.floor(r()*50), emp: 1+Math.floor(r()*5), vol: 1+Math.floor(r()*5),
+        verified: r() < 0.62, active: Math.floor(r()*40), certs, inc, markets,
+        web: "www."+slug+".example", email: (role==="buyer"?"compras@":"ventas@")+slug+".example",
+        phone: "+"+(r()*80+10|0)+" "+(r()*900+100|0)+" "+(r()*9000+1000|0) });
+    }
+  });
+  return out;
+}
+const DEMO = genCompanies();
+const cityOf = (co) => co.city || cname(co.cc);
+
+/* ---------- Cuenta y plan (en este navegador) ---------- */
+let ACC = store.get("account", null);    // empresa registrada por el usuario
+let PLAN = store.get("plan", "free");    // free | buyer | supplier | both
+const allCompanies = () => ACC ? [accCompany(), ...DEMO] : DEMO;
+function accCompany(){ return { id:"me", demo:false, mine:true, name:ACC.name, cc:ACC.cc, city:ACC.city, role:ACC.role, codes:ACC.codes, sector:ACC.sector,
+  founded:null, emp:null, vol:null, verified:false, active:0, certs:[], inc:[], markets:ACC.markets||[], web:ACC.web, email:ACC.email, phone:ACC.phone, desc:ACC.desc, contact:ACC.contact, jobrole:ACC.jobrole }; }
+const getCo = (id) => allCompanies().find(c => c.id===id);
+/* ¿puede ver el contacto de esta empresa? */
+function canSee(co){
+  if(co.mine) return true;
+  if(PLAN==="both") return true;
+  if(PLAN==="buyer") return co.role!=="buyer";      // ve proveedores (y mixtas)
+  if(PLAN==="supplier") return co.role!=="supplier"; // ve compradores (y mixtas)
+  return false;
+}
+const alertLimit = () => PLAN==="free" ? 1 : PLAN==="both" ? 999 : 10;
+const reqLimit = () => PLAN==="free" ? 3 : 9999;
+
+/* ---------- Búsqueda ---------- */
+const S = { mode:"suppliers", q:"", cont:"", sub:"", cc:"", sector:"", hs:"", verified:false, sort:"rel" };
+
+/* interpreta el texto: códigos, países, regiones y palabras */
+function parseQuery(q){
+  const nq = norm(q); const res = { codes:[], ccs:[], conts:[], subs:[], words:[] };
+  if(!nq) return res;
+  const digits = nq.replace(/[.\s]/g,"");
+  if(/^\d{2,6}$/.test(digits)){ res.codes.push(digits); return res; }
+  ALL_CC.forEach(cc => { const n = norm(cname(cc)); if(n && (nq===n || nq.includes(n) || (nq.length>=4 && n.startsWith(nq)))) res.ccs.push(cc); });
+  GEO.forEach(ct => { if([ct.es,ct.en].some(x => norm(x)===nq)) res.conts.push(ct.id); ct.subs.forEach(s => { if([s.es,s.en].some(x => norm(x)===nq)) res.subs.push(s.id); }); });
+  let rest = nq; res.ccs.forEach(cc => rest = rest.replace(norm(cname(cc)),""));
+  res.words = rest.split(/\s+/).filter(w => w.length>1 && !["de","del","la","el","los","las","en","y","of","the","and","for","para","con"].includes(w));
+  return res;
+}
+/* códigos HS cuyo texto coincide con las palabras */
+function codesForWords(words){
+  if(!words.length) return [];
+  return Object.values(CODE).filter(c => { const hay = norm(c.es+" "+c.en+" "+c.kw+" "+(SECTOR[c.sector]?.es||"")); return words.every(w => hay.includes(w)); }).map(c => c.code);
+}
+function geoOk(co, f){
+  if(f.cc && co.cc!==f.cc) return false;
+  if(f.sub && COUNTRY[co.cc]?.sub!==f.sub) return false;
+  if(f.cont && COUNTRY[co.cc]?.cont!==f.cont) return false;
+  return true;
+}
+function searchCompanies(f){
+  const p = parseQuery(f.q);
+  const wordCodes = codesForWords(p.words);
+  const role = f.mode==="buyers" ? "buyer" : f.mode==="suppliers" ? "supplier" : (f.role||"");
+  let list = allCompanies().filter(co => {
+    if(role && co.role!==role && co.role!=="both") return false;
+    if(!geoOk(co, f)) return false;
+    if(f.sector && co.sector!==f.sector) return false;
+    if(f.hs && !co.codes.some(c => related(c, f.hs))) return false;
+    if(f.verified && !co.verified && !co.mine) return false;
+    if(p.ccs.length && !p.ccs.includes(co.cc)) return false;
+    if(p.conts.length && !p.conts.includes(COUNTRY[co.cc]?.cont)) return false;
+    if(p.subs.length && !p.subs.includes(COUNTRY[co.cc]?.sub)) return false;
+    if(p.codes.length && !co.codes.some(c => p.codes.some(q2 => related(c,q2)))) return false;
+    if(p.words.length){
+      const byCode = co.codes.some(c => wordCodes.some(w => related(c,w)));
+      const byName = p.words.every(w => norm(co.name+" "+cityOf(co)).includes(w));
+      if(!byCode && !byName) return false;
+    }
+    return true;
+  });
+  const score = (co) => (co.mine?100:0) + (co.verified?5:0) + (PLAN!=="free" && co.mine ? 0 : 0) - co.active/10 + (co.codes.length);
+  if(f.sort==="name") list.sort((a,b)=>a.name.localeCompare(b.name));
+  else if(f.sort==="active") list.sort((a,b)=>a.active-b.active);
+  else if(f.sort==="size") list.sort((a,b)=>(b.vol||0)-(a.vol||0));
+  else list.sort((a,b)=>score(b)-score(a));
+  return list;
+}
+function searchCodes(q){
+  const p = parseQuery(q);
+  let codes;
+  if(p.codes.length){ const d = p.codes[0]; codes = Object.keys(CODE).filter(c => related(c,d)); }
+  else if(p.words.length) codes = codesForWords(p.words);
+  else codes = Object.keys(CODE);
+  return codes.sort();
+}
+const countFor = (code, filt={}) => {
+  let s=0,b=0; allCompanies().forEach(co => { if(!geoOk(co,filt)) return; if(!co.codes.some(c=>related(c,code))) return; if(co.role!=="buyer") s++; if(co.role!=="supplier") b++; });
+  return {s,b};
+};
+const countryStats = (cc) => { const cs = allCompanies().filter(c=>c.cc===cc); return { s:cs.filter(c=>c.role!=="buyer").length, b:cs.filter(c=>c.role!=="supplier").length, n:cs.length }; };
+
+/* sugerencias del buscador */
+function suggestions(q){
+  const nq = norm(q); if(nq.length<2) return [];
+  const out = [];
+  const digits = nq.replace(/[.\s]/g,"");
+  if(/^\d+$/.test(digits)){
+    Object.values(CODE).filter(c=>c.code.startsWith(digits)).slice(0,6).forEach(c => out.push({k:"HS", v:fmtCode(c.code), d:L(c), q:c.code}));
+    HS_CHAPTERS.filter(c=>c[0].startsWith(digits.slice(0,2))).slice(0,2).forEach(c => out.push({k:t("chapter"), v:c[0], d:LANG==="en"?c[2]:c[1], q:c[0]}));
+    return out;
+  }
+  Object.values(CODE).filter(c => norm(c.es+" "+c.en+" "+c.kw).includes(nq)).slice(0,6).forEach(c => out.push({k:"HS", v:fmtCode(c.code), d:L(c), q:c.code}));
+  ALL_CC.filter(cc => norm(cname(cc)).includes(nq)).slice(0,4).forEach(cc => out.push({k:t("lv_country"), v:cc, d:cname(cc), q:cname(cc)}));
+  GEO.forEach(ct => ct.subs.forEach(s => { if(norm(L(s)).includes(nq)) out.push({k:t("lv_sub"), v:"", d:L(s), q:L(s)}); }));
+  return out.slice(0,10);
+}
+
+/* ================================================================
+   GLOBAL TRADE FINDER — vistas y navegación
+   ================================================================ */
+const V = $("#view");
+const ICON = {
+  check:'<svg viewBox="0 0 20 20" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M8.2 14.6 3.6 10l1.4-1.4 3.2 3.2 6.8-6.8 1.4 1.4z"/></svg>',
+  wa:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm4.5 12.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.5-.3Z"/></svg>',
+  logo:'<svg viewBox="0 0 200 200" aria-hidden="true"><rect x="4" y="4" width="192" height="192" rx="46" fill="#1E3A4C"/><g stroke="#FFFFFF" stroke-linecap="round"><polygon points="100,42 150.2,71 150.2,129 100,158 49.8,129 49.8,71" fill="none" stroke-opacity=".35" stroke-width="4"/><path d="M100 100L100 42M100 100L150.2 71M100 100L150.2 129M100 100L100 158M100 100L49.8 129M100 100L49.8 71" stroke-width="6"/></g><g fill="#FFFFFF"><circle cx="150.2" cy="71" r="10"/><circle cx="150.2" cy="129" r="10"/><circle cx="100" cy="158" r="10"/><circle cx="49.8" cy="129" r="10"/><circle cx="49.8" cy="71" r="10"/></g><circle cx="100" cy="42" r="13" fill="#E0A21A"/><circle cx="100" cy="100" r="20" fill="#E0A21A"/></svg>'
+};
+const roleTag = (r) => `<span class="role ${r}">${t(r)}</span>`;
+const ccTag = (cc) => `<span class="cc" title="${esc(cname(cc))}">${cc}</span>`;
+const codeChip = (c, extra="") => `<a class="chip" href="#hs-${c}${extra}" title="${esc(codeLabel(c))}"><span class="mono">${fmtCode(c)}</span> ${esc(shorten(codeLabel(c),34))}</a>`;
+const shorten = (s,n) => s.length>n ? s.slice(0,n-1)+"…" : s;
+const crumbs = (items) => `<nav class="crumbs" aria-label="Ruta">${items.map((it,i)=> (i?'<span class="sep">›</span>':'') + (it.href ? `<a href="${it.href}">${it.lv?`<span class="lv">${it.lv}</span>`:''}${esc(it.label)}</a>` : `<span>${it.lv?`<span class="lv">${it.lv}</span>`:''}${esc(it.label)}</span>`)).join("")}</nav>`;
+function toast(msg){ $$(".toast").forEach(x=>x.remove()); const d = document.createElement("div"); d.className="toast"; d.setAttribute("role","status"); d.textContent = msg; document.body.appendChild(d); setTimeout(()=>d.remove(), 2800); }
+const go = (h) => { if(location.hash === "#"+h) render(); else location.hash = h; };
+
+/* ---------- Encabezado, franja y pie ---------- */
+function chrome(){
+  document.documentElement.lang = LANG;
+  const cur = (location.hash||"#inicio").slice(1).split("-")[0];
+  const items = [["buscar","nav_search"],["mercados","nav_markets"],["hs","nav_hs"],["empresas","nav_companies"],["planes","nav_plans"]];
+  const map = {region:"mercados",sub:"mercados",pais:"mercados",pc:"mercados",sec:"hs",cap:"hs",empresa:"empresas"};
+  const active = map[cur] || cur;
+  $("#mainNav").innerHTML = items.map(([h,k])=>`<a href="#${h}" class="${active===h?'on':''}">${t(k)}</a>`).join("") +
+    (ACC ? `<a href="#cuenta" class="${active==='cuenta'?'on':''}">${t("nav_account")}</a>` : `<a href="#registro" class="cta">${t("nav_register")}</a>`);
+  $$(".lang button").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang===LANG));
+  $("#demoStrip").innerHTML = `<div class="wrap">${t("demo_strip")}</div>`;
+  $("#footTxt").textContent = t("footer",{y:new Date().getFullYear()});
+  $("#footLinks").innerHTML = `<a href="#terminos">${t("terms")}</a><a href="#privacidad">${t("privacy")}</a><a href="https://skynetgenesis.com" target="_blank" rel="noopener">skynetgenesis.com</a>`;
+  $("#waTxt").textContent = t("support");
+  $("#waFloat").href = "https://wa.me/"+SG.waIntl+"?text="+encodeURIComponent(LANG==="en"?"Hello, I need help with Global Trade Finder.":"Hola, necesito ayuda con Global Trade Finder.");
+}
+
+/* ---------- Buscador central (portada y resultados) ---------- */
+const MODES = [["buyers","tab_buyers"],["suppliers","tab_suppliers"],["products","tab_products"],["markets","tab_markets"]];
+function searchBox(){
+  return `<form class="searchbox" id="sform" role="search" autocomplete="off">
+    <div class="stabs" role="tablist">${MODES.map(([m,k])=>`<button type="button" role="tab" id="tab-${m}" data-mode="${m}" aria-selected="${S.mode===m}">${t(k)}</button>`).join("")}</div>
+    <div class="srow">
+      <input id="q" type="search" value="${esc(S.q)}" placeholder="${esc(t("ph_"+S.mode))}" aria-label="${esc(t("btn_search"))}" aria-autocomplete="list" aria-controls="suggest">
+      <button class="btn btn-main" type="submit">${t("btn_search")}</button>
+      <div class="suggest" id="suggest" hidden role="listbox"></div>
+    </div>
+    <div class="quick"><span class="lbl">${t("popular")}</span>
+      ${["090111","080440","060311","854143","270112","6212"].map(c=>`<button type="button" class="chip" data-quick="${c}"><span class="mono">${fmtCode(c)}</span> ${esc(shorten(codeLabel(c),26))}</button>`).join("")}
+    </div>
+  </form>`;
+}
+function bindSearchBox(){
+  const f = $("#sform"); if(!f) return;
+  const q = $("#q"), box = $("#suggest"); let act = -1, items = [];
+  $$("[data-mode]", f).forEach(b => b.onclick = () => { S.mode = b.dataset.mode; $$("[data-mode]",f).forEach(x=>x.setAttribute("aria-selected", x===b)); q.placeholder = t("ph_"+S.mode); q.focus(); });
+  $$("[data-quick]", f).forEach(b => b.onclick = () => { S.q = ""; S.hs = b.dataset.quick; if(S.mode==="markets") S.mode="suppliers"; go("buscar"); });
+  const close = () => { box.hidden = true; act=-1; };
+  q.oninput = () => {
+    items = suggestions(q.value);
+    if(!items.length){ close(); return; }
+    box.innerHTML = items.map((s,i)=>`<button type="button" role="option" data-i="${i}"><span class="k">${esc(s.k)}</span><span class="mono">${esc(s.v)}</span><span>${esc(s.d)}</span></button>`).join("");
+    box.hidden = false;
+    $$("button", box).forEach(b => b.onmousedown = (e) => { e.preventDefault(); choose(items[+b.dataset.i]); });
+  };
+  q.onkeydown = (e) => {
+    if(box.hidden) return;
+    const bs = $$("button", box);
+    if(e.key==="ArrowDown"){ act = Math.min(act+1, bs.length-1); e.preventDefault(); }
+    else if(e.key==="ArrowUp"){ act = Math.max(act-1, 0); e.preventDefault(); }
+    else if(e.key==="Enter" && act>=0){ e.preventDefault(); choose(items[act]); return; }
+    else if(e.key==="Escape"){ close(); return; }
+    bs.forEach((b,i)=>b.classList.toggle("act", i===act));
+  };
+  q.onblur = () => setTimeout(close, 120);
+  const choose = (s) => { close(); if(s.k==="HS" || s.k===t("chapter")){ S.hs = s.q; S.q = ""; } else { S.q = s.q; } submit(); };
+  const submit = () => { if(S.mode==="markets"){ const p = parseQuery(S.q); if(p.ccs.length===1){ go("pais-"+p.ccs[0]); return; } if(p.subs.length){ go("sub-"+p.subs[0]); return; } if(p.conts.length){ go("region-"+p.conts[0]); return; } } go("buscar"); };
+  f.onsubmit = (e) => { e.preventDefault(); S.q = q.value.trim(); submit(); };
+}
+
+/* ---------- Portada ---------- */
+function vHome(){
+  const nCodes = new Set(allCompanies().flatMap(c=>c.codes)).size;
+  const featured = ["CO","US","DE","NL","CN","MX","AE","BR"];
+  return `<div class="wrap">
+  <div class="hero">
+    <div class="eyebrow">${t("eyebrow")}</div>
+    <h1>Find Buyers. <span>Find Suppliers.</span> Explore Global Markets.</h1>
+    <p class="lead">${t("hero_lead")}</p>
+    ${searchBox()}
+    <div class="path" aria-label="${esc(t("path_title"))}">
+      ${[["lv_cont","5"],["lv_sub","20"],["lv_country",ALL_CC.length],["lv_sector",SECTORS.length],["lv_product",Object.keys(CODE).length],["lv_hs","HS 2022"],["lv_comp",allCompanies().length]].map(([k,v])=>`<div><b>${t(k)}</b><span class="num">${v}</span></div>`).join("")}
+    </div>
+    <div class="stats">
+      <div class="stat"><b>${ALL_CC.length}</b><span>${t("st_countries")}</span></div>
+      <div class="stat"><b>96</b><span>${t("st_chapters")}</span></div>
+      <div class="stat"><b>${nCodes}</b><span>${t("st_codes")}</span></div>
+      <div class="stat"><b>${allCompanies().length}</b><span>${t("st_companies")}</span></div>
+    </div>
+  </div>
+  <section>
+    <div class="sec-head"><h2>${t("sec_continents")}</h2><a class="btn btn-ghost btn-sm" href="#mercados">${t("more")}</a></div>
+    <div class="grid">${GEO.map(ct => { const ccs = ct.subs.flatMap(s=>s.c); const n = allCompanies().filter(c=>ccs.includes(c.cc)).length;
+      return `<a class="tile" href="#region-${ct.id}"><h3>${esc(L(ct))}</h3><div class="meta"><span><b>${ct.subs.length}</b> ${t("subregions")}</span><span><b>${ccs.length}</b> ${t("countries")}</span><span><b>${n}</b> ${t("companies").toLowerCase()}</span></div></a>`; }).join("")}</div>
+  </section>
+  <section>
+    <div class="sec-head"><h2>${t("sec_featured")}</h2></div>
+    <div class="grid">${featured.map(cc => { const st = countryStats(cc); return `<a class="tile" href="#pais-${cc}"><div style="display:flex;gap:8px;align-items:center">${ccTag(cc)}<h3>${esc(cname(cc))}</h3></div><div class="meta"><span><b>${st.s}</b> ${t("suppliers").toLowerCase()}</span><span><b>${st.b}</b> ${t("buyers").toLowerCase()}</span></div></a>`; }).join("")}</div>
+  </section>
+  <section>
+    <div class="sec-head"><h2>${t("sec_popular_hs")}</h2><a class="btn btn-ghost btn-sm" href="#hs">${t("nav_hs")}</a></div>
+    ${codesTable(["090111","080440","060311","2709","851713","854143","6212","7108","3004","1511"])}
+  </section>
+  </div>`;
+}
+function codesTable(codes, filt={}, extra=""){
+  return `<div class="tablewrap"><table class="t"><thead><tr><th>${t("lv_hs")}</th><th>${t("lv_product")}</th><th>${t("lv_sector")}</th><th class="r">${t("suppliers")}</th><th class="r">${t("buyers")}</th></tr></thead><tbody>
+  ${codes.map(c => { const n = countFor(c, filt); return `<tr><td class="codecell"><a href="#${extra?extra+c:"hs-"+c}">${fmtCode(c)}</a></td><td>${esc(codeLabel(c))}</td><td class="muted">${esc(L(SECTOR[CODE[c]?.sector]))}</td><td class="r">${n.s}</td><td class="r">${n.b}</td></tr>`; }).join("")}
+  </tbody></table></div>`;
+}
+
+/* ---------- Resultados de búsqueda ---------- */
+function filtersPanel(showRole){
+  const subs = S.cont ? CONT[S.cont].subs : GEO.flatMap(g=>g.subs);
+  const ccs = S.sub ? SUB[S.sub].c : S.cont ? CONT[S.cont].subs.flatMap(s=>s.c) : ALL_CC;
+  const opt = (v,l,sel) => `<option value="${esc(v)}" ${sel?"selected":""}>${esc(l)}</option>`;
+  return `<aside class="filters" aria-label="${t("filters")}">
+    <h3>${t("filters")}</h3>
+    ${showRole?`<div class="field"><label for="f-role">${t("f_role")}</label><select id="f-role">${opt("",t("f_all"))}${["supplier","buyer","both"].map(r=>opt(r,t(r),S.role===r)).join("")}</select></div>`:""}
+    <div class="field"><label for="f-cont">${t("f_region")}</label><select id="f-cont">${opt("",t("f_all"))}${GEO.map(g=>opt(g.id,L(g),S.cont===g.id)).join("")}</select></div>
+    <div class="field"><label for="f-sub">${t("f_sub")}</label><select id="f-sub">${opt("",t("f_all"))}${subs.map(s=>opt(s.id,L(s),S.sub===s.id)).join("")}</select></div>
+    <div class="field"><label for="f-cc">${t("f_country")}</label><select id="f-cc">${opt("",t("f_all"))}${ccs.map(cc=>[cc,cname(cc)]).sort((a,b)=>a[1].localeCompare(b[1])).map(([cc,n])=>opt(cc,n,S.cc===cc)).join("")}</select></div>
+    <div class="field"><label for="f-sector">${t("f_sector")}</label><select id="f-sector">${opt("",t("f_all"))}${SECTORS.map(s=>opt(s.id,L(s),S.sector===s.id)).join("")}</select></div>
+    <div class="field"><label for="f-hs">${t("f_hs")}</label><input id="f-hs" value="${esc(S.hs)}" placeholder="0901" inputmode="numeric" maxlength="7"><span class="hint">${S.hs && codeLabel(S.hs)!==S.hs ? esc(codeLabel(S.hs)) : "2, 4 o 6 dígitos"}</span></div>
+    <label class="check"><input type="checkbox" id="f-ver" ${S.verified?"checked":""}><span>${t("f_verified")}</span></label>
+    <button type="button" class="btn btn-ghost btn-sm" id="f-clear">${t("f_clear")}</button>
+  </aside>`;
+}
+function bindFilters(rerender){
+  const on = (id, fn) => { const el = $("#"+id); if(el) el.onchange = fn; };
+  on("f-role", e => { S.role = e.target.value; rerender(); });
+  on("f-cont", e => { S.cont = e.target.value; S.sub=""; S.cc=""; rerender(); });
+  on("f-sub", e => { S.sub = e.target.value; S.cc=""; if(S.sub) S.cont = SUB[S.sub].cont; rerender(); });
+  on("f-cc", e => { S.cc = e.target.value; if(S.cc){ S.sub = COUNTRY[S.cc].sub; S.cont = COUNTRY[S.cc].cont; } rerender(); });
+  on("f-sector", e => { S.sector = e.target.value; rerender(); });
+  on("f-hs", e => { S.hs = e.target.value.replace(/\D/g,"").slice(0,6); rerender(); });
+  on("f-ver", e => { S.verified = e.target.checked; rerender(); });
+  const c = $("#f-clear"); if(c) c.onclick = () => { Object.assign(S,{cont:"",sub:"",cc:"",sector:"",hs:"",verified:false,role:""}); rerender(); };
+}
+function coRow(co){
+  const desc = co.codes.slice(0,3).map(c=>codeChip(c)).join("");
+  return `<article class="co">
+    <div style="min-width:0">
+      <h3><a href="#empresa-${co.id}">${esc(co.name)}</a></h3>
+      <div class="line">${ccTag(co.cc)}<span>${esc(cityOf(co))}${co.city?", "+esc(cname(co.cc)):""}</span><span>·</span><span>${esc(L(SECTOR[co.sector]))}</span>${co.verified?`<span class="ver">${ICON.check}${t("verified")}</span>`:""}</div>
+    </div>
+    <div class="side">${roleTag(co.role)}${co.mine?`<span class="mine">${t("yours")}</span>`:co.demo?`<span class="demo">${t("demo")}</span>`:""}</div>
+    <div class="codes">${desc}<a class="btn btn-ghost btn-sm" href="#empresa-${co.id}" style="margin-left:auto">${t("view_profile")}</a></div>
+  </article>`;
+}
+const PAGE = 25;
+let shown = PAGE;
+function vSearch(){
+  const isCo = S.mode==="buyers" || S.mode==="suppliers";
+  let body;
+  if(isCo){
+    const list = searchCompanies(S);
+    LAST = { kind:"companies", rows:list };
+    body = `<div class="resbar"><h2>${t(S.mode)} <span class="muted num" style="font-size:1.1rem">· ${list.length}</span></h2>
+      <div class="acts"><select id="f-sort" aria-label="${t("f_sort")}" class="btn btn-ghost btn-sm">${["rel","name","active","size"].map(s=>`<option value="${s}" ${S.sort===s?"selected":""}>${t("sort_"+({rel:"rel",name:"name",active:"active",size:"size"})[s])}</option>`).join("")}</select>
+      <button class="btn btn-ghost btn-sm" id="b-save">${t("save_search")}</button><button class="btn btn-ghost btn-sm" id="b-alert">${t("create_alert")}</button><button class="btn btn-main btn-sm" id="b-export">${t("export")}</button></div></div>
+      ${list.length ? `<div class="list">${list.slice(0,shown).map(coRow).join("")}</div>${list.length>shown?`<p style="text-align:center"><button class="btn btn-ghost" id="b-more">${t("more")} (${t("showing")} ${shown} ${t("of")} ${list.length})</button></p>`:""}` : emptyBox()}`;
+  } else if(S.mode==="products"){
+    const codes = searchCodes(S.q || S.hs).filter(c => !S.sector || CODE[c].sector===S.sector);
+    LAST = { kind:"codes", rows:codes };
+    body = `<div class="resbar"><h2>${t("products")} <span class="muted num" style="font-size:1.1rem">· ${codes.length}</span></h2><div class="acts"><button class="btn btn-main btn-sm" id="b-export">${t("export")}</button></div></div>
+      ${codes.length ? codesTable(codes, {cont:S.cont,sub:S.sub,cc:S.cc}) : emptyBox()}`;
+  } else {
+    const p = parseQuery(S.q);
+    let ccs = ALL_CC.filter(cc => (!S.cont || COUNTRY[cc].cont===S.cont) && (!S.sub || COUNTRY[cc].sub===S.sub) && (!p.ccs.length || p.ccs.includes(cc)));
+    LAST = { kind:"countries", rows:ccs };
+    body = `<div class="resbar"><h2>${t("tab_markets")} <span class="muted num" style="font-size:1.1rem">· ${ccs.length}</span></h2></div>
+      <div class="grid">${ccs.map(cc=>{const st=countryStats(cc);return `<a class="tile" href="#pais-${cc}"><div style="display:flex;gap:8px;align-items:center">${ccTag(cc)}<h3>${esc(cname(cc))}</h3></div><div class="meta"><span>${esc(L(SUB[COUNTRY[cc].sub]))}</span><span><b>${st.s}</b> ${t("suppliers").toLowerCase()}</span><span><b>${st.b}</b> ${t("buyers").toLowerCase()}</span></div></a>`;}).join("")}</div>`;
+  }
+  return `<div class="wrap page">${searchBox()}<div class="layout" style="margin-top:18px">${filtersPanel(false)}<div id="res">${body}</div></div></div>`;
+}
+const emptyBox = () => `<div class="empty"><b>${t("no_results")}</b>${t("no_results_hint")}</div>`;
+let LAST = { kind:"companies", rows:[] };
+function bindSearch(){
+  bindSearchBox(); bindFilters(() => { shown = PAGE; render(); });
+  const s = $("#f-sort"); if(s) s.onchange = e => { S.sort = e.target.value; render(); };
+  const m = $("#b-more"); if(m) m.onclick = () => { shown += PAGE; render(); };
+  const sv = $("#b-save"); if(sv) sv.onclick = saveSearch;
+  const al = $("#b-alert"); if(al) al.onclick = () => openAlert();
+  const ex = $("#b-export"); if(ex) ex.onclick = openExport;
+}
+function describeSearch(f){
+  const parts = [t(f.mode)];
+  if(f.q) parts.push("“"+f.q+"”");
+  if(f.hs) parts.push("HS "+fmtCode(f.hs));
+  if(f.cc) parts.push(cname(f.cc)); else if(f.sub) parts.push(L(SUB[f.sub])); else if(f.cont) parts.push(L(CONT[f.cont]));
+  if(f.sector) parts.push(L(SECTOR[f.sector]));
+  if(f.verified) parts.push(t("verified"));
+  return parts.join(" · ");
+}
+function saveSearch(){
+  const list = store.get("saved", []);
+  const f = {...S}; delete f.sort;
+  list.unshift({ id:Date.now(), f, at:new Date().toISOString() });
+  store.set("saved", list.slice(0,30)); toast(t("saved_ok"));
+}
+
+/* ---------- Mercados: continente → subregión → país → sector → producto ---------- */
+function vMarkets(){
+  return `<div class="wrap page">${crumbs([{label:t("home"),href:"#inicio"},{label:t("nav_markets")}])}
+  <h1>${t("markets_title")}</h1><p class="lead">${t("markets_lead")}</p>
+  <div class="stack" style="margin-top:18px">${GEO.map(ct => `<div class="panel"><div class="sec-head" style="margin-bottom:10px"><h2 style="margin:0"><a href="#region-${ct.id}" style="color:inherit;text-decoration:none">${esc(L(ct))}</a></h2><a class="btn btn-ghost btn-sm" href="#region-${ct.id}">${t("more")}</a></div>
+    <div class="grid">${ct.subs.map(s=>`<a class="tile" href="#sub-${s.id}"><h3>${esc(L(s))}</h3><div class="meta">${s.c.map(cc=>ccTag(cc)).join(" ")}</div></a>`).join("")}</div></div>`).join("")}</div></div>`;
+}
+function vRegion(id){
+  const ct = CONT[id]; if(!ct) return vNotFound();
+  return `<div class="wrap page">${crumbs([{label:t("nav_markets"),href:"#mercados"},{lv:t("lv_cont"),label:L(ct)}])}
+  <h1>${esc(L(ct))}</h1>
+  <div class="grid" style="margin-top:16px">${ct.subs.map(s=>{const n=allCompanies().filter(c=>s.c.includes(c.cc)).length;return `<a class="tile" href="#sub-${s.id}"><h3>${esc(L(s))}</h3><div class="meta"><span><b>${s.c.length}</b> ${t("countries")}</span><span><b>${n}</b> ${t("companies").toLowerCase()}</span></div><div class="meta">${s.c.map(cc=>esc(cname(cc))).join(" · ")}</div></a>`;}).join("")}</div></div>`;
+}
+function vSub(id){
+  const s = SUB[id]; if(!s) return vNotFound(); const ct = CONT[s.cont];
+  return `<div class="wrap page">${crumbs([{label:t("nav_markets"),href:"#mercados"},{lv:t("lv_cont"),label:L(ct),href:"#region-"+ct.id},{lv:t("lv_sub"),label:L(s)}])}
+  <h1>${esc(L(s))}</h1>
+  <div class="grid" style="margin-top:16px">${s.c.map(cc=>{const st=countryStats(cc);return `<a class="tile" href="#pais-${cc}"><div style="display:flex;gap:8px;align-items:center">${ccTag(cc)}<h3>${esc(cname(cc))}</h3></div><div class="meta"><span><b>${st.s}</b> ${t("suppliers").toLowerCase()}</span><span><b>${st.b}</b> ${t("buyers").toLowerCase()}</span></div></a>`;}).join("")}</div></div>`;
+}
+function vCountry(cc, sector){
+  if(!COUNTRY[cc]) return vNotFound();
+  const s = SUB[COUNTRY[cc].sub], ct = CONT[COUNTRY[cc].cont];
+  const cos = allCompanies().filter(c => c.cc===cc);
+  const st = countryStats(cc);
+  const secCount = {}; cos.forEach(c => new Set([c.sector, ...c.codes.map(cd=>CODE[cd]?.sector).filter(Boolean)]).forEach(k => secCount[k] = (secCount[k]||0)+1));
+  const inSec = sector ? cos.filter(c => c.codes.some(cd => CODE[cd]?.sector===sector) || c.sector===sector) : cos;
+  const codes = [...new Set(inSec.flatMap(c=>c.codes))].filter(c => !sector || CODE[c].sector===sector).sort();
+  const max = Math.max(1, ...codes.map(c => { const n=countFor(c,{cc}); return n.s+n.b; }));
+  const cr = [{label:t("nav_markets"),href:"#mercados"},{lv:t("lv_cont"),label:L(ct),href:"#region-"+ct.id},{lv:t("lv_sub"),label:L(s),href:"#sub-"+s.id},{lv:t("lv_country"),label:cname(cc),href:sector?"#pais-"+cc:null}];
+  if(sector) cr.push({lv:t("lv_sector"),label:L(SECTOR[sector])});
+  return `<div class="wrap page">${crumbs(cr)}
+  <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">${ccTag(cc)}<h1>${esc(cname(cc))}</h1></div>
+  <div class="stats" style="grid-template-columns:repeat(3,1fr)"><div class="stat"><b>${st.s}</b><span>${t("suppliers")}</span></div><div class="stat"><b>${st.b}</b><span>${t("buyers")}</span></div><div class="stat"><b>${codes.length}</b><span>${t("lv_hs")}</span></div></div>
+  <section style="padding-bottom:22px"><div class="sec-head" style="margin-bottom:10px"><h2>${t("by_sector")}</h2></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap"><a class="chip" href="#pais-${cc}" ${!sector?'style="background:var(--petroleo);color:#fff;border-color:var(--petroleo)"':''}>${t("all_sectors")} · ${cos.length}</a>
+    ${Object.entries(secCount).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`<a class="chip" href="#pais-${cc}-${k}" ${sector===k?'style="background:var(--petroleo);color:#fff;border-color:var(--petroleo)"':''}>${esc(L(SECTOR[k]))} · ${n}</a>`).join("")}</div>
+  </section>
+  <div class="two">
+    <div class="stack">
+      <div><div class="sec-head" style="margin-bottom:8px"><h2>${t("products_in")} ${esc(cname(cc))}</h2></div>
+      ${codes.length ? codesTable(codes, {cc}, "pc-"+cc+"-") : emptyBox()}</div>
+    </div>
+    <div class="panel"><h2>${t("top_hs")}</h2>
+      <div class="legend"><span><i style="background:var(--petroleo)"></i>${t("suppliers")}</span><span><i style="background:var(--ambar)"></i>${t("buyers")}</span></div>
+      <div class="bars">${codes.map(c=>({c,n:countFor(c,{cc})})).sort((a,b)=>(b.n.s+b.n.b)-(a.n.s+a.n.b)).slice(0,10).map(({c,n})=>`<a class="bar" href="#pc-${cc}-${c}" style="color:inherit;text-decoration:none" title="${esc(codeLabel(c))}"><span class="lab"><span class="mono">${fmtCode(c)}</span> ${esc(codeLabel(c))}</span><span class="trk"><span class="s" style="width:${n.s/max*100}%"></span><span class="b" style="width:${n.b/max*100}%"></span></span><span class="v">${n.s+n.b}</span></a>`).join("")}</div>
+    </div>
+  </div>
+  <section><div class="sec-head"><h2>${t("companies")}</h2>
+    <div class="acts" style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm" data-goto="suppliers">${t("country_suppliers")} ${esc(cname(cc))}</button><button class="btn btn-ghost btn-sm" data-goto="buyers">${t("country_buyers")} ${esc(cname(cc))}</button></div></div>
+    <div class="list">${inSec.slice(0,12).map(coRow).join("") || emptyBox()}</div>
+  </section></div>`;
+}
+function bindCountry(cc, sector){
+  $$("[data-goto]").forEach(b => b.onclick = () => { Object.assign(S,{mode:b.dataset.goto,q:"",hs:"",sector:sector||"",cc,sub:COUNTRY[cc].sub,cont:COUNTRY[cc].cont,verified:false}); shown=PAGE; go("buscar"); });
+}
+/* país + código: el último paso de la ruta (empresas) */
+function vCountryCode(cc, code){
+  if(!COUNTRY[cc] || !(CODE[code]||CHAP[code])) return vNotFound();
+  const s = SUB[COUNTRY[cc].sub], ct = CONT[COUNTRY[cc].cont];
+  const sec = CODE[code]?.sector;
+  const cos = allCompanies().filter(c => c.cc===cc && c.codes.some(x=>related(x,code)));
+  const sup = cos.filter(c=>c.role!=="buyer"), buy = cos.filter(c=>c.role!=="supplier");
+  return `<div class="wrap page">${crumbs([{label:t("nav_markets"),href:"#mercados"},{lv:t("lv_cont"),label:L(ct),href:"#region-"+ct.id},{lv:t("lv_sub"),label:L(s),href:"#sub-"+s.id},{lv:t("lv_country"),label:cname(cc),href:"#pais-"+cc},
+    sec?{lv:t("lv_sector"),label:L(SECTOR[sec]),href:"#pais-"+cc+"-"+sec}:null,{lv:t("lv_product"),label:codeLabel(code)},{lv:t("lv_hs"),label:fmtCode(code),href:"#hs-"+code}].filter(Boolean))}
+  <div class="eyebrow">${codeLevel(code)} ${fmtCode(code)}</div>
+  <h1>${esc(codeLabel(code))} · ${esc(cname(cc))}</h1>
+  <div class="two" style="margin-top:16px">
+    <div><h2 style="font-size:1.5rem;text-transform:uppercase;margin-bottom:8px">${t("suppliers")} · ${sup.length}</h2><div class="list">${sup.map(coRow).join("") || emptyBox()}</div></div>
+    <div><h2 style="font-size:1.5rem;text-transform:uppercase;margin-bottom:8px">${t("buyers")} · ${buy.length}</h2><div class="list">${buy.map(coRow).join("") || emptyBox()}</div></div>
+  </div></div>`;
+}
+
+/* ---------- Sistema Armonizado ---------- */
+function vHS(){
+  return `<div class="wrap page">${crumbs([{label:t("home"),href:"#inicio"},{label:t("nav_hs")}])}
+  <h1>${t("hs_title")}</h1><p class="lead">${t("hs_lead")}</p>
+  <form id="hsform" class="srow" style="margin:16px 0;max-width:640px" role="search"><input id="hsq" type="search" placeholder="${esc(t("hs_search_ph"))}" aria-label="${esc(t("hs_search_ph"))}"><button class="btn btn-main" type="submit">${t("btn_search")}</button></form>
+  <div id="hsres"></div>
+  <div class="tablewrap"><table class="t"><thead><tr><th>${t("section")}</th><th>${t("lv_product")}</th><th class="r">${t("chapters")}</th></tr></thead><tbody>
+  ${HS_SECTIONS.map(s=>`<tr><td class="codecell"><a href="#sec-${s.id}">${s.id}</a></td><td><a href="#sec-${s.id}" style="color:inherit">${esc(L(s))}</a></td><td class="r mono">${String(s.ch[0]).padStart(2,"0")}–${String(s.ch[1]).padStart(2,"0")}</td></tr>`).join("")}
+  </tbody></table></div></div>`;
+}
+function bindHS(){
+  const f = $("#hsform"); if(!f) return;
+  f.onsubmit = (e) => { e.preventDefault(); const q = $("#hsq").value.trim(); const d = q.replace(/[.\s]/g,"");
+    if(/^\d{2}$/.test(d) && CHAP[d]){ go("cap-"+d); return; }
+    if(/^\d{4,6}$/.test(d) && CODE[d]){ go("hs-"+d); return; }
+    const codes = searchCodes(q); const chaps = HS_CHAPTERS.filter(c => norm(c[1]+" "+c[2]).includes(norm(q)));
+    $("#hsres").innerHTML = `<div class="stack" style="margin-bottom:18px">${chaps.length?`<div class="grid">${chaps.map(c=>`<a class="tile" href="#cap-${c[0]}"><span class="mono" style="font-weight:700">${t("chapter")} ${c[0]}</span><h3>${esc(LANG==="en"?c[2]:c[1])}</h3></a>`).join("")}</div>`:""}${codes.length?codesTable(codes):(!chaps.length?emptyBox():"")}</div>`; };
+}
+function vSection(id){
+  const s = HS_SECTIONS.find(x=>x.id===id); if(!s) return vNotFound();
+  const chs = HS_CHAPTERS.filter(c => { const n=+c[0]; return n>=s.ch[0] && n<=s.ch[1]; });
+  return `<div class="wrap page">${crumbs([{label:t("nav_hs"),href:"#hs"},{lv:t("section"),label:s.id+" · "+L(s)}])}
+  <div class="eyebrow">${t("section")} ${s.id}</div><h1>${esc(L(s))}</h1>
+  <div class="grid" style="margin-top:16px">${chs.map(c=>{const n=Object.keys(CODE).filter(k=>k.startsWith(c[0])&&k.length===4).length;return `<a class="tile" href="#cap-${c[0]}"><span class="mono" style="font-weight:700">${t("chapter")} ${c[0]}</span><h3>${esc(LANG==="en"?c[2]:c[1])}</h3><div class="meta"><span><b>${n}</b> ${t("heading").toLowerCase()}s</span></div></a>`;}).join("")}</div></div>`;
+}
+function vChapter(ch){
+  const c = CHAP[ch]; if(!c) return vNotFound(); const s = sectionOf(ch);
+  const codes = Object.keys(CODE).filter(k=>k.startsWith(ch)).sort();
+  return `<div class="wrap page">${crumbs([{label:t("nav_hs"),href:"#hs"},{lv:t("section"),label:s.id,href:"#sec-"+s.id},{lv:t("chapter"),label:ch+" · "+L(c)}])}
+  <div class="eyebrow">${t("chapter")} ${ch}</div><h1>${esc(L(c))}</h1>
+  <div style="margin-top:16px">${codes.length ? codesTable(codes) : `<div class="empty">${t("hs_no_codes")}</div>`}</div></div>`;
+}
+function vCode(code){
+  const c = CODE[code]; if(!c) return CHAP[code] ? vChapter(code) : vNotFound();
+  const ch = code.slice(0,2), s = sectionOf(ch);
+  const cr = [{label:t("nav_hs"),href:"#hs"},{lv:t("section"),label:s.id,href:"#sec-"+s.id},{lv:t("chapter"),label:ch,href:"#cap-"+ch}];
+  if(code.length===6 && CODE[code.slice(0,4)]) cr.push({lv:t("heading"),label:fmtCode(code.slice(0,4)),href:"#hs-"+code.slice(0,4)});
+  cr.push({lv:codeLevel(code),label:fmtCode(code)});
+  const children = Object.keys(CODE).filter(k=>k.length===6 && k.startsWith(code) && k!==code);
+  const cos = allCompanies().filter(co => co.codes.some(x=>related(x,code)));
+  const byCc = {}; cos.forEach(co => { byCc[co.cc] = byCc[co.cc] || {s:0,b:0}; if(co.role!=="buyer") byCc[co.cc].s++; if(co.role!=="supplier") byCc[co.cc].b++; });
+  const rows = Object.entries(byCc).sort((a,b)=>(b[1].s+b[1].b)-(a[1].s+a[1].b));
+  const max = Math.max(1,...rows.map(r=>r[1].s+r[1].b));
+  const n = countFor(code);
+  return `<div class="wrap page">${crumbs(cr)}
+  <div class="eyebrow">${codeLevel(code)} ${fmtCode(code)} · ${esc(L(SECTOR[c.sector]))}</div><h1>${esc(L(c))}</h1>
+  <p class="lead">${esc(LANG==="en"?c.es:c.en)}</p>
+  <div class="stats" style="grid-template-columns:repeat(3,1fr)"><div class="stat"><b>${n.s}</b><span>${t("suppliers")}</span></div><div class="stat"><b>${n.b}</b><span>${t("buyers")}</span></div><div class="stat"><b>${rows.length}</b><span>${t("countries")}</span></div></div>
+  ${children.length?`<section style="padding-bottom:0"><div style="display:flex;gap:6px;flex-wrap:wrap">${children.map(k=>codeChip(k)).join("")}</div></section>`:""}
+  <div class="two" style="margin-top:20px">
+    <div class="stack">
+      <div class="sec-head" style="margin:0"><h2 style="font-size:1.5rem">${t("companies")} · ${cos.length}</h2>
+        <div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm" data-cgo="suppliers">${t("tab_suppliers")}</button><button class="btn btn-ghost btn-sm" data-cgo="buyers">${t("tab_buyers")}</button></div></div>
+      <div class="list">${cos.slice(0,15).map(coRow).join("") || emptyBox()}</div>
+    </div>
+    <div class="panel"><h2>${t("where_trade")}</h2>
+      <div class="legend"><span><i style="background:var(--petroleo)"></i>${t("suppliers")}</span><span><i style="background:var(--ambar)"></i>${t("buyers")}</span></div>
+      <div class="bars">${rows.map(([cc,v])=>`<a class="bar" href="#pc-${cc}-${code}" style="color:inherit;text-decoration:none"><span class="lab">${ccTag(cc)} ${esc(cname(cc))}</span><span class="trk"><span class="s" style="width:${v.s/max*100}%"></span><span class="b" style="width:${v.b/max*100}%"></span></span><span class="v">${v.s+v.b}</span></a>`).join("")}</div>
+    </div>
+  </div></div>`;
+}
+function bindCode(code){ $$("[data-cgo]").forEach(b => b.onclick = () => { Object.assign(S,{mode:b.dataset.cgo,q:"",hs:code,cc:"",sub:"",cont:"",sector:"",verified:false}); shown=PAGE; go("buscar"); }); }
+
+/* ---------- Directorio ---------- */
+function vDirectory(){
+  const f = {...S, mode:"all", q:S.dq||""};
+  const list = searchCompanies(f);
+  LAST = { kind:"companies", rows:list };
+  return `<div class="wrap page">${crumbs([{label:t("home"),href:"#inicio"},{label:t("nav_companies")}])}
+  <h1>${t("dir_title")}</h1><p class="lead">${t("dir_lead")}</p>
+  <div class="layout" style="margin-top:16px">${filtersPanel(true)}<div>
+    <form id="dform" class="srow" style="margin-bottom:12px" role="search"><input id="dq" type="search" value="${esc(S.dq||"")}" placeholder="${esc(t("ph_buyers"))}" aria-label="${esc(t("btn_search"))}"><button class="btn btn-main" type="submit">${t("btn_search")}</button></form>
+    <div class="resbar"><h2>${t("companies")} <span class="muted num" style="font-size:1.1rem">· ${list.length}</span></h2><div class="acts"><button class="btn btn-main btn-sm" id="b-export">${t("export")}</button></div></div>
+    ${list.length?`<div class="list">${list.slice(0,shown).map(coRow).join("")}</div>${list.length>shown?`<p style="text-align:center"><button class="btn btn-ghost" id="b-more">${t("more")} (${t("showing")} ${shown} ${t("of")} ${list.length})</button></p>`:""}`:emptyBox()}
+  </div></div></div>`;
+}
+function bindDirectory(){
+  bindFilters(() => { shown = PAGE; render(); });
+  $("#dform").onsubmit = (e) => { e.preventDefault(); S.dq = $("#dq").value.trim(); shown=PAGE; render(); };
+  const m = $("#b-more"); if(m) m.onclick = () => { shown += PAGE; render(); };
+  $("#b-export").onclick = openExport;
+}
+
+/* ---------- Perfil de empresa ---------- */
+function coDesc(co){
+  if(co.desc) return co.desc;
+  const prod = co.codes.map(c=>codeLabel(c).toLowerCase()).slice(0,2).join(LANG==="en"?" and ":" y ");
+  const mk = co.markets.slice(0,3).map(cname).join(", ") || t("world");
+  const sec = LANG==="en" ? L(SECTOR[co.sector]) : t("ent_kind")+" "+L(SECTOR[co.sector]).toLowerCase();
+  const key = (co.mine || !co.inc.length) ? "d_both" : co.role==="buyer"?"d_buy":co.role==="supplier"?"d_sup":"d_both";
+  return t(key,{sec, city:cityOf(co), country:cname(co.cc), prod, mk, inc:co.inc.join(" / "), cert:co.certs.join(" / ")});
+}
+function vCompany(id){
+  const co = getCo(id); if(!co) return vNotFound();
+  const see = canSee(co);
+  const lockMsg = co.role==="buyer" ? t("locked_buyers") : t("locked_suppliers");
+  const ct = CONT[COUNTRY[co.cc].cont];
+  const contact = see ? `<dl class="kv">
+      <dt>${co.contact?t("r_contact"):t("contact_dept")}</dt><dd>${esc(co.contact ? co.contact+(co.jobrole?" · "+co.jobrole:"") : (co.role==="buyer"?t("dept_buy"):t("dept_sup")))}</dd>
+      <dt>${t("email")}</dt><dd class="mono" style="user-select:all">${esc(co.email||"—")}</dd>
+      <dt>${t("phone")}</dt><dd class="mono" style="user-select:all">${esc(co.phone||"—")}</dd>
+      <dt>${t("website")}</dt><dd class="mono">${esc(co.web||"—")}</dd></dl>`
+    : `<div class="lock"><b>${t("locked_title")}</b>${lockMsg}<dl class="kv blur" aria-hidden="true" style="margin-top:10px"><dt>${t("email")}</dt><dd>xxxxx@xxxxxxx.xxx</dd><dt>${t("phone")}</dt><dd>+00 000 0000000</dd></dl><a class="btn btn-amb btn-sm" href="#planes" style="margin-top:10px">${t("see_plans")}</a></div>`;
+  const isSup = co.role!=="buyer";
+  return `<div class="wrap page">${crumbs([{label:t("nav_companies"),href:"#empresas"},{lv:t("lv_cont"),label:L(ct),href:"#region-"+ct.id},{lv:t("lv_country"),label:cname(co.cc),href:"#pais-"+co.cc},{label:co.name}])}
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px">${roleTag(co.role)}${co.verified?`<span class="ver">${ICON.check}${t("verified")}</span>`:""}${co.mine?`<span class="mine">${t("yours")}</span>`:co.demo?`<span class="demo">${t("demo")}</span>`:""}</div>
+  <h1>${esc(co.name)}</h1>
+  <p class="lead" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${ccTag(co.cc)} ${esc(cityOf(co))}${co.city?", "+esc(cname(co.cc)):""} · ${esc(L(SECTOR[co.sector]))}</p>
+  <div class="two" style="margin-top:18px">
+    <div class="stack">
+      <div class="panel"><h2>${t("about")}</h2><p style="margin:0 0 12px">${esc(coDesc(co))}</p>
+        <dl class="kv">${co.founded?`<dt>${t("founded")}</dt><dd class="num">${co.founded}</dd>`:""}${co.emp?`<dt>${t("employees")}</dt><dd>${t("emp_"+co.emp)}</dd>`:""}${co.vol?`<dt>${t("volume")}</dt><dd>${t("vol_"+co.vol)}</dd>`:""}
+        <dt>${t("active")}</dt><dd>${co.active===0?t("today"):(LANG==="en"?co.active+" "+t("days"):co.active+" "+t("days"))}</dd></dl></div>
+      <div class="panel"><h2>${t("products")}</h2>${codesTable(co.codes)}</div>
+      <div class="panel"><h2>${isSup?t("selling_to"):t("sourcing_from")}</h2><div style="display:flex;gap:6px;flex-wrap:wrap">${(co.markets.length?co.markets:[]).map(cc=>`<a class="chip" href="#pais-${cc}">${ccTag(cc)} ${esc(cname(cc))}</a>`).join("") || `<span class="muted">${t("world")}</span>`}</div>
+        ${co.certs.length?`<h2 style="margin-top:16px">${t("certs")}</h2><div style="display:flex;gap:6px;flex-wrap:wrap">${co.certs.map(c=>`<span class="chip">${esc(c)}</span>`).join("")}</div>`:""}
+        ${co.inc.length?`<h2 style="margin-top:16px">${t("incoterms")}</h2><div style="display:flex;gap:6px;flex-wrap:wrap">${co.inc.map(c=>`<span class="chip mono">${c}</span>`).join("")}</div>`:""}</div>
+    </div>
+    <div class="stack">
+      <div class="panel"><h2>${t("contact")}</h2>${contact}</div>
+      ${co.mine ? `<a class="btn btn-main" href="#registro">${t("reg_edit")}</a>` : `<div class="panel" style="display:flex;flex-direction:column;gap:8px">
+        <button class="btn btn-main" id="b-rfq">${isSup?t("send_rfq"):t("send_offer")}</button>
+        <button class="btn btn-ghost" id="b-contact">${t("request_contact")}</button></div>`}
+    </div>
+  </div></div>`;
+}
+function bindCompany(id){
+  const co = getCo(id); if(!co) return;
+  const isSup = co.role!=="buyer";
+  const r = $("#b-rfq"); if(r) r.onclick = () => openRFQ(co, isSup ? "rfq" : "offer");
+  const c = $("#b-contact"); if(c) c.onclick = () => openRFQ(co, "contact");
+}
+
+/* ---------- Planes ---------- */
+const PLANS = [
+  { id:"free", name:"plan_free", who:"plan_free_who", feats:["pf1","pf2","pf3","pf4"] },
+  { id:"buyer", name:"buyer", who:"plan_buyer_who", feats:["pb1","pb2","pb3","pb4"] },
+  { id:"supplier", name:"supplier", who:"plan_supplier_who", feats:["ps1","ps2","ps3","ps4"] },
+  { id:"both", name:"both", who:"plan_both_who", feats:["pa1","pa2","pa3","pa4"], rec:true }
+];
+function vPlans(){
+  return `<div class="wrap page">${crumbs([{label:t("home"),href:"#inicio"},{label:t("nav_plans")}])}
+  <h1>${t("plans_title")}</h1><p class="lead">${t("plans_lead")}</p>
+  <div class="plans" style="margin-top:18px">${PLANS.map(p=>`<div class="plan ${p.rec?"rec":""}">
+    ${PLAN===p.id?`<span class="badge-cur">${t("current")}</span>`:p.rec?`<span class="badge-cur" style="background:var(--ambar);color:#15232B">${t("recommended")}</span>`:""}
+    <h3>${t(p.name)}</h3><div class="who">${t(p.who)}</div>
+    <div class="price">${p.id==="free"?t("price_free"):t("price_quote")}</div>
+    <ul>${p.feats.map(f=>`<li>${t(f)}</li>`).join("")}</ul>
+    <div class="acts">${p.id==="free" ? (ACC?"":`<a class="btn btn-main" href="#registro">${t("nav_register")}</a>`) : `<a class="btn btn-main" href="${CATALOG_URL}" target="_blank" rel="noopener">${t("hire")}</a><button class="btn btn-ghost btn-sm" data-demo="${p.id}" ${PLAN===p.id?"disabled":""}>${t("try_demo")}</button>`}
+    ${p.id==="free" && PLAN!=="free" ? `<button class="btn btn-ghost btn-sm" data-demo="free">${t("try_demo")}</button>`:""}</div>
+  </div>`).join("")}</div>
+  <p class="muted" style="margin-top:14px;font-size:.9rem">${PLAN==="free"?t("using_free"):t("demo_plan_on")+" <b>"+t(PLAN)+"</b>"}</p></div>`;
+}
+function bindPlans(){ $$("[data-demo]").forEach(b => b.onclick = () => { PLAN = b.dataset.demo; store.set("plan", PLAN); toast(PLAN==="free"?t("using_free"):t("demo_plan_on")+" "+t(PLAN)); render(); }); }
+
+/* ================================================================
+   GLOBAL TRADE FINDER — registro, cuenta, ventanas y enrutador
+   ================================================================ */
+/* ---------- Registro de empresa ---------- */
+let REG = null;
+function regDraft(){ return ACC ? JSON.parse(JSON.stringify(ACC)) : { role:"", name:"", taxid:"", cc:"CO", city:"", sector:"", codes:[], markets:[], web:"", contact:"", jobrole:"", email:"", phone:"", desc:"", ok:false }; }
+function vRegister(){
+  if(!REG) REG = regDraft();
+  const f = (id,label,type="text",full=false,ph="") => `<div class="field ${full?"full":""}"><label for="r-${id}">${label}</label><input id="r-${id}" data-k="${id}" type="${type}" value="${esc(REG[id]||"")}" placeholder="${esc(ph)}"><div class="err" id="e-${id}"></div></div>`;
+  const ccOpts = ALL_CC.map(cc=>[cc,cname(cc)]).sort((a,b)=>a[1].localeCompare(b[1])).map(([cc,n])=>`<option value="${cc}" ${REG.cc===cc?"selected":""}>${esc(n)}</option>`).join("");
+  return `<div class="wrap page" style="max-width:900px">${crumbs([{label:t("home"),href:"#inicio"},{label:ACC?t("reg_edit"):t("reg_title")}])}
+  <h1>${ACC?t("reg_edit"):t("reg_title")}</h1><p class="lead">${t("reg_lead")}</p>
+  <form id="rform" class="panel stack" style="margin-top:16px" novalidate>
+    <div><h2 style="font-size:1.3rem">${t("reg_profile")}</h2>
+      <div class="opts">${[["buyer","reg_buyer_d"],["supplier","reg_supplier_d"],["both","reg_both_d"]].map(([r,d])=>`<button type="button" class="opt" id="r-role-${r}" data-role="${r}" aria-pressed="${REG.role===r}"><b>${t(r)}</b><span>${t(d)}</span></button>`).join("")}</div>
+      <div class="err" id="e-role"></div></div>
+    <div class="fields">
+      ${f("name",t("r_name"),"text",true,"Ej. Café Sierra Nevada S.A.S.")}
+      ${f("taxid",t("r_taxid"))}
+      <div class="field"><label for="r-cc">${t("r_country")}</label><select id="r-cc" data-k="cc">${ccOpts}</select></div>
+      ${f("city",t("r_city"),"text",false,"Santa Marta")}
+      <div class="field"><label for="r-sector">${t("r_sector")}</label><select id="r-sector" data-k="sector"><option value="">${t("choose")}</option>${SECTORS.map(s=>`<option value="${s.id}" ${REG.sector===s.id?"selected":""}>${esc(L(s))}</option>`).join("")}</select><div class="err" id="e-sector"></div></div>
+      <div class="field full"><label for="r-hs">${t("r_hs")}</label>
+        <div class="srow"><input id="r-hs" type="text" placeholder="${esc(t("r_hs_ph"))}" list="hslist" autocomplete="off"><button type="button" class="btn btn-ghost" id="r-hs-add">+</button></div>
+        <datalist id="hslist">${Object.values(CODE).map(c=>`<option value="${c.code} · ${esc(L(c))}"></option>`).join("")}</datalist>
+        <div class="chips-in" id="r-codes">${REG.codes.map(c=>`<span class="chip"><span class="mono">${fmtCode(c)}</span> ${esc(shorten(codeLabel(c),30))}<button type="button" data-rm="${c}" aria-label="${t("del")} ${c}">×</button></span>`).join("")}</div>
+        <div class="err" id="e-codes"></div></div>
+      <div class="field full"><label for="r-markets">${t("r_markets")}</label><select id="r-markets" multiple size="5">${ALL_CC.map(cc=>[cc,cname(cc)]).sort((a,b)=>a[1].localeCompare(b[1])).map(([cc,n])=>`<option value="${cc}" ${REG.markets.includes(cc)?"selected":""}>${esc(n)}</option>`).join("")}</select><span class="hint">Ctrl / Cmd + clic</span></div>
+      ${f("web",t("r_web"),"text",false,"www.empresa.com")}
+      ${f("contact",t("r_contact"))}
+      ${f("jobrole",t("r_role"))}
+      ${f("email",t("r_email"),"email")}
+      ${f("phone",t("r_phone"),"tel")}
+      <div class="field full"><label for="r-desc">${t("r_desc")}</label><textarea id="r-desc" data-k="desc" maxlength="500">${esc(REG.desc||"")}</textarea></div>
+    </div>
+    <label class="check"><input type="checkbox" id="r-ok" ${REG.ok?"checked":""}><span>${t("r_accept")} <a href="#terminos">${t("terms")}</a> · <a href="#privacidad">${t("privacy")}</a></span></label>
+    <div class="err" id="e-ok"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="submit" class="btn btn-main">${t("r_save")}</button>${ACC?`<a class="btn btn-ghost" href="#cuenta">${t("cancel")}</a>`:""}</div>
+  </form></div>`;
+}
+function bindRegister(){
+  const form = $("#rform");
+  $$("[data-role]",form).forEach(b => b.onclick = () => { REG.role = b.dataset.role; $$("[data-role]",form).forEach(x=>x.setAttribute("aria-pressed", x===b)); $("#e-role").textContent=""; });
+  $$("[data-k]",form).forEach(el => el.addEventListener("input", () => { REG[el.dataset.k] = el.value; }));
+  $("#r-markets").onchange = (e) => { REG.markets = [...e.target.selectedOptions].map(o=>o.value); };
+  $("#r-ok").onchange = (e) => REG.ok = e.target.checked;
+  const addCode = () => {
+    const v = $("#r-hs").value.trim(); if(!v) return;
+    let code = (v.match(/^\d{2,6}/)||[])[0];
+    if(!code){ const found = searchCodes(v)[0]; code = found; }
+    if(code && (CODE[code]||CHAP[code]) && !REG.codes.includes(code)){ REG.codes.push(code); if(!REG.sector && CODE[code]) REG.sector = CODE[code].sector; }
+    $("#r-hs").value = ""; render(); setTimeout(()=>$("#r-hs")?.focus(),0);
+  };
+  $("#r-hs-add").onclick = addCode;
+  $("#r-hs").addEventListener("change", addCode);
+  $("#r-hs").addEventListener("keydown", e => { if(e.key==="Enter"){ e.preventDefault(); addCode(); } });
+  $$("[data-rm]",form).forEach(b => b.onclick = () => { REG.codes = REG.codes.filter(c=>c!==b.dataset.rm); render(); });
+  form.onsubmit = (e) => {
+    e.preventDefault();
+    $$(".err",form).forEach(x=>x.textContent="");
+    const errs = {};
+    if(!REG.role) errs.role = t("err_profile");
+    ["name","city","contact","email"].forEach(k => { if(!String(REG[k]||"").trim()) errs[k] = t("err_req"); });
+    if(REG.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(REG.email)) errs.email = t("err_email");
+    if(!REG.sector) errs.sector = t("err_req");
+    if(!REG.codes.length) errs.codes = t("err_hs");
+    if(!REG.ok) errs.ok = t("err_accept");
+    Object.entries(errs).forEach(([k,v]) => { const el = $("#e-"+k); if(el) el.textContent = v; });
+    if(Object.keys(errs).length){ const first = $(".err:not(:empty)",form); first?.scrollIntoView({behavior:"smooth",block:"center"}); return; }
+    const wasNew = !ACC;
+    ACC = {...REG, updated:new Date().toISOString()}; store.set("account", ACC); REG = null;
+    toast(wasNew ? t("r_saved") : t("r_updated")); go("empresa-me");
+  };
+}
+
+/* ---------- Mi cuenta ---------- */
+function vAccount(){
+  if(!ACC) return `<div class="wrap page">${crumbs([{label:t("home"),href:"#inicio"},{label:t("acc_title")}])}<div class="empty" style="margin-top:20px"><b>${t("acc_none")}</b>${t("acc_none_d")}<p><a class="btn btn-main" href="#registro">${t("nav_register")}</a></p></div></div>`;
+  const saved = store.get("saved", []), alerts = store.get("alerts", []), reqs = store.get("requests", []);
+  return `<div class="wrap page">${crumbs([{label:t("home"),href:"#inicio"},{label:t("acc_title")}])}
+  <h1>${t("acc_title")}</h1>
+  <div class="two" style="margin-top:16px">
+    <div class="stack">
+      <div class="panel"><h2>${t("saved_searches")}</h2>${saved.length?`<div class="tablewrap" style="border:0"><table class="t"><tbody>${saved.map(s=>`<tr><td>${esc(describeSearch(s.f))}</td><td class="r num">${searchCompanies(s.f).length}</td><td class="r" style="white-space:nowrap"><button class="btn btn-ghost btn-sm" data-run="${s.id}">${t("run")}</button> <button class="linkbtn" data-delsaved="${s.id}">${t("del")}</button></td></tr>`).join("")}</tbody></table></div>`:`<p class="muted">${t("none_saved")}</p>`}</div>
+      <div class="panel"><div class="sec-head" style="margin-bottom:8px"><h2 style="margin:0">${t("alerts")}</h2><button class="btn btn-ghost btn-sm" id="b-newalert">${t("create_alert")}</button></div>
+        ${alerts.length?`<div class="tablewrap" style="border:0"><table class="t"><tbody>${alerts.map(a=>`<tr><td><b>${esc(a.name)}</b><div class="muted" style="font-size:.84rem">${esc(describeSearch(a.f))} · ${t(a.freq)}</div></td><td class="r num">${searchCompanies(a.f).length} <span class="muted" style="font-size:.8rem">${t("matches_now")}</span></td><td class="r"><button class="linkbtn" data-delalert="${a.id}">${t("del")}</button></td></tr>`).join("")}</tbody></table></div>`:`<p class="muted">${t("none_alerts")}</p>`}</div>
+      <div class="panel"><h2>${t("requests")}</h2>${reqs.length?`<div class="tablewrap" style="border:0"><table class="t"><thead><tr><th>${t("companies")}</th><th>${t("lv_hs")}</th><th>${t("rfq_qty")}</th><th>${t("generated")}</th></tr></thead><tbody>${reqs.map(r=>`<tr><td><a href="#empresa-${r.coId}">${esc(r.coName)}</a><div class="muted" style="font-size:.8rem">${t(r.kind==="offer"?"offer_title":r.kind==="contact"?"request_contact":"rfq_title")}</div></td><td class="codecell">${r.code?fmtCode(r.code):"—"}</td><td class="num">${esc(r.qty?r.qty+" "+r.unit:"—")}</td><td class="num">${new Date(r.at).toLocaleDateString(LANG==="en"?"en-US":"es-CO")}</td></tr>`).join("")}</tbody></table></div>`:`<p class="muted">${t("none_requests")}</p>`}</div>
+    </div>
+    <div class="stack">
+      <div class="panel"><h2>${t("my_company")}</h2>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">${roleTag(ACC.role)}${ccTag(ACC.cc)}</div>
+        <h3 style="font-size:1.4rem">${esc(ACC.name)}</h3><p class="muted" style="margin:4px 0 10px">${esc(ACC.city)}, ${esc(cname(ACC.cc))} · ${esc(L(SECTOR[ACC.sector]))}</p>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px">${ACC.codes.map(c=>codeChip(c)).join("")}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn btn-ghost btn-sm" href="#empresa-me">${t("view_profile")}</a><a class="btn btn-ghost btn-sm" href="#registro">${t("edit")}</a></div></div>
+      <div class="panel"><h2>${t("my_plan")}</h2><p style="margin:0 0 10px"><b>${PLAN==="free"?t("plan_free"):t(PLAN)}</b></p><a class="btn btn-main btn-sm" href="#planes">${t("see_plans")}</a></div>
+      <button class="linkbtn" id="b-logout" style="align-self:flex-start;color:var(--danger)">${t("logout")}</button>
+    </div>
+  </div></div>`;
+}
+function bindAccount(){
+  $$("[data-run]").forEach(b => b.onclick = () => { const s = store.get("saved",[]).find(x=>x.id==b.dataset.run); if(s){ Object.assign(S, {cont:"",sub:"",cc:"",sector:"",hs:"",verified:false,q:""}, s.f); shown=PAGE; go("buscar"); } });
+  $$("[data-delsaved]").forEach(b => b.onclick = () => { store.set("saved", store.get("saved",[]).filter(x=>x.id!=b.dataset.delsaved)); render(); });
+  $$("[data-delalert]").forEach(b => b.onclick = () => { store.set("alerts", store.get("alerts",[]).filter(x=>x.id!=b.dataset.delalert)); render(); });
+  const na = $("#b-newalert"); if(na) na.onclick = () => openAlert();
+  const lo = $("#b-logout"); if(lo) lo.onclick = () => modal(`<h2>${t("logout")}</h2><p>${t("logout_confirm")}</p><div class="acts"><button class="btn btn-ghost" data-close>${t("cancel")}</button><button class="btn btn-main" id="m-yes" style="background:var(--danger)">${t("yes_delete")}</button></div>`, (m) => {
+    $("#m-yes",m).onclick = () => { ["account","saved","alerts","requests","plan"].forEach(store.del); ACC=null; PLAN="free"; closeModal(); go("inicio"); };
+  });
+}
+
+/* ---------- Ventanas ---------- */
+function modal(html, bind){
+  const root = $("#modalRoot");
+  root.innerHTML = `<div class="modal-bg" id="mbg"><div class="modal" role="dialog" aria-modal="true">${html}</div></div>`;
+  const m = $(".modal", root);
+  $("#mbg").addEventListener("mousedown", e => { if(e.target.id==="mbg") closeModal(); });
+  $$("[data-close]", m).forEach(b => b.onclick = closeModal);
+  document.addEventListener("keydown", escClose);
+  bind && bind(m);
+  setTimeout(() => { const first = $("input,select,textarea,button", m); first && first.focus(); }, 30);
+}
+function escClose(e){ if(e.key==="Escape") closeModal(); }
+function closeModal(){ $("#modalRoot").innerHTML = ""; document.body.classList.remove("pr"); document.removeEventListener("keydown", escClose); }
+
+function openRFQ(co, kind){
+  if(!ACC){ modal(`<h2>${t(kind==="offer"?"offer_title":kind==="contact"?"request_contact":"rfq_title")}</h2><p>${t("need_account")}</p><div class="acts"><button class="btn btn-ghost" data-close>${t("cancel")}</button><a class="btn btn-main" href="#registro" data-close>${t("nav_register")}</a></div>`); return; }
+  const reqs = store.get("requests", []);
+  const month = new Date().toISOString().slice(0,7);
+  if(reqs.filter(r=>r.at.startsWith(month)).length >= reqLimit()){ modal(`<h2>${t("nav_plans")}</h2><p>${t("limit_req")}</p><div class="acts"><button class="btn btn-ghost" data-close>${t("close")}</button><a class="btn btn-main" href="#planes" data-close>${t("see_plans")}</a></div>`); return; }
+  const title = t(kind==="offer"?"offer_title":kind==="contact"?"request_contact":"rfq_title");
+  const prod = kind!=="contact" ? `<div class="fields">
+      <div class="field full"><label for="q-code">${t("rfq_product")}</label><select id="q-code">${co.codes.map(c=>`<option value="${c}">${fmtCode(c)} · ${esc(codeLabel(c))}</option>`).join("")}</select></div>
+      <div class="field"><label for="q-qty">${t("rfq_qty")}</label><input id="q-qty" type="number" min="1" value="1"></div>
+      <div class="field"><label for="q-unit">${t("rfq_unit")}</label><select id="q-unit">${["t (toneladas)","kg","contenedor 20'","contenedor 40'","unidades","cajas","litros"].map(u=>`<option>${u}</option>`).join("")}</select></div>
+      <div class="field"><label for="q-inc">${t("rfq_incoterm")}</label><select id="q-inc">${INCOS.map(i=>`<option ${i==="FOB"?"selected":""}>${i}</option>`).join("")}</select></div>
+      <div class="field"><label for="q-dest">${t("rfq_dest")}</label><input id="q-dest" value="${esc(ACC.city||"")}"></div>
+    </div>` : "";
+  modal(`<h2>${title}</h2><p class="muted" style="margin-top:0">${esc(co.name)} · ${esc(cname(co.cc))}</p>
+    <form id="qform" class="stack">${prod}
+      <div class="field"><label for="q-msg">${t("rfq_msg")}</label><textarea id="q-msg">${esc(kind==="contact" ? (LANG==="en"?`Hello, ${ACC.name} would like to get in touch.`:`Hola, en ${ACC.name} queremos ponernos en contacto con ustedes.`) : "")}</textarea></div>
+      <p class="muted" style="margin:0;font-size:.86rem">${t("rfq_note")}</p>
+      <div class="acts"><button type="button" class="btn btn-ghost" data-close>${t("cancel")}</button><button type="submit" class="btn btn-main">${t("send")}</button></div>
+    </form>`, (m) => {
+    $$("[data-close]", m).forEach(b => b.onclick = closeModal);
+    $("#qform", m).onsubmit = (e) => { e.preventDefault();
+      const r = { id:Date.now(), kind, coId:co.id, coName:co.name, code:$("#q-code",m)?.value||"", qty:$("#q-qty",m)?.value||"", unit:$("#q-unit",m)?.value||"", inc:$("#q-inc",m)?.value||"", dest:$("#q-dest",m)?.value||"", msg:$("#q-msg",m).value, at:new Date().toISOString() };
+      store.set("requests", [r, ...store.get("requests", [])]); closeModal(); toast(t("rfq_ok")); };
+  });
+}
+
+function openAlert(){
+  if(!ACC){ modal(`<h2>${t("alert_title")}</h2><p>${t("need_account")}</p><div class="acts"><button class="btn btn-ghost" data-close>${t("cancel")}</button><a class="btn btn-main" href="#registro" data-close>${t("nav_register")}</a></div>`); return; }
+  const alerts = store.get("alerts", []);
+  if(alerts.length >= alertLimit()){ modal(`<h2>${t("alert_title")}</h2><p>${t("alert_limit")}</p><div class="acts"><button class="btn btn-ghost" data-close>${t("close")}</button><a class="btn btn-main" href="#planes" data-close>${t("see_plans")}</a></div>`); return; }
+  const base = (S.mode==="buyers"||S.mode==="suppliers") ? {...S} : {...S, mode: ACC.role==="buyer" ? "suppliers" : "buyers", hs: S.hs || ACC.codes[0] || ""};
+  delete base.sort;
+  modal(`<h2>${t("alert_title")}</h2><p class="muted" style="margin-top:0">${t("alert_lead")}</p>
+    <form id="aform" class="stack">
+      <div class="fields">
+        <div class="field"><label for="a-mode">${t("alert_what")}</label><select id="a-mode"><option value="buyers" ${base.mode==="buyers"?"selected":""}>${t("buyers")}</option><option value="suppliers" ${base.mode==="suppliers"?"selected":""}>${t("suppliers")}</option></select></div>
+        <div class="field"><label for="a-hs">${t("f_hs")}</label><input id="a-hs" value="${esc(base.hs||"")}" inputmode="numeric" maxlength="6"></div>
+        <div class="field"><label for="a-cc">${t("f_country")}</label><select id="a-cc"><option value="">${t("world")}</option>${ALL_CC.map(cc=>[cc,cname(cc)]).sort((a,b)=>a[1].localeCompare(b[1])).map(([cc,n])=>`<option value="${cc}" ${base.cc===cc?"selected":""}>${esc(n)}</option>`).join("")}</select></div>
+        <div class="field"><label for="a-freq">${t("alert_freq")}</label><select id="a-freq"><option value="daily">${t("daily")}</option><option value="weekly" selected>${t("weekly")}</option></select></div>
+        <div class="field full"><label for="a-name">${t("alert_name")}</label><input id="a-name" value="${esc(describeSearch(base))}"></div>
+      </div>
+      <div class="acts"><button type="button" class="btn btn-ghost" data-close>${t("cancel")}</button><button type="submit" class="btn btn-main">${t("save")}</button></div>
+    </form>`, (m) => {
+    $$("[data-close]", m).forEach(b => b.onclick = closeModal);
+    $("#aform", m).onsubmit = (e) => { e.preventDefault();
+      const cc = $("#a-cc",m).value;
+      const f = { mode:$("#a-mode",m).value, q:base.q||"", hs:$("#a-hs",m).value.replace(/\D/g,""), cc, sub:cc?COUNTRY[cc].sub:"", cont:cc?COUNTRY[cc].cont:"", sector:base.sector||"", verified:!!base.verified };
+      store.set("alerts", [{ id:Date.now(), name:$("#a-name",m).value || describeSearch(f), f, freq:$("#a-freq",m).value, at:new Date().toISOString() }, ...alerts]);
+      closeModal(); toast(t("alert_ok")); if((location.hash||"")==="#cuenta") render(); };
+  });
+}
+
+/* ---------- Exportar (con referencia a SkyNet Genesis) ---------- */
+function exportRows(){
+  if(LAST.kind==="companies") return { head:[t("companies"),t("f_role"),t("lv_country"),t("r_city"),t("lv_sector"),t("lv_hs"),t("verified"),t("email"),t("phone")],
+    rows: LAST.rows.slice(0,200).map(co => [co.name, t(co.role), cname(co.cc), co.city||"—", L(SECTOR[co.sector]), co.codes.map(fmtCode).join(" "), co.verified?"✓":"", canSee(co)?co.email:"—", canSee(co)?co.phone:"—"]) };
+  if(LAST.kind==="codes") return { head:[t("lv_hs"),t("lv_product"),t("lv_sector"),t("suppliers"),t("buyers")],
+    rows: LAST.rows.slice(0,200).map(c => { const n = countFor(c,{cont:S.cont,sub:S.sub,cc:S.cc}); return [fmtCode(c), codeLabel(c), L(SECTOR[CODE[c]?.sector]), n.s, n.b]; }) };
+  return { head:[t("lv_country"),t("lv_sub"),t("suppliers"),t("buyers")], rows: LAST.rows.map(cc => { const s=countryStats(cc); return [cname(cc), L(SUB[COUNTRY[cc].sub]), s.s, s.b]; }) };
+}
+const reportFootText = () => `${t("report_by")} · ${SG.mail} · WhatsApp ${SG.wa} · ${t("generated")}: ${new Date().toLocaleString(LANG==="en"?"en-US":"es-CO")}`;
+function openExport(){
+  if(PLAN==="free"){ modal(`<h2>${t("export_title")}</h2><p>${t("export_locked")}</p><div class="acts"><button class="btn btn-ghost" data-close>${t("close")}</button><a class="btn btn-main" href="#planes" data-close>${t("see_plans")}</a></div>`); return; }
+  const { head, rows } = exportRows();
+  const title = describeSearch(S);
+  modal(`<div style="display:flex;gap:10px;align-items:center;margin-bottom:6px"><span style="width:34px;height:34px;display:block">${ICON.logo}</span><div><h2 style="margin:0">Global Trade Finder</h2><div class="muted" style="font-size:.86rem">${esc(title)}</div></div></div>
+    <p class="muted no-print" style="margin:6px 0 10px;font-size:.88rem">${t("export_lead")}</p>
+    <div class="tablewrap"><table class="t" id="exp-table"><thead><tr>${head.map(h=>`<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+    <div class="report-foot">${ICON.logo}<span>${esc(reportFootText())}</span></div>
+    <div class="acts no-print"><button class="btn btn-ghost" data-close>${t("close")}</button><button class="btn btn-ghost" id="x-copy">${t("copy")}</button>${FRAMED?"":`<button class="btn btn-ghost" id="x-csv">${t("download_csv")}</button><button class="btn btn-main" id="x-print">${t("print")}</button>`}</div>`, (m) => {
+    const tsv = [head, ...rows].map(r => r.join("\t")).join("\n") + "\n\n" + reportFootText();
+    $("#x-copy",m).onclick = () => { const ok = () => toast(t("copied")); try { navigator.clipboard.writeText(tsv).then(ok, () => selectTable()); } catch(e){ selectTable(); } };
+    const selectTable = () => { const r = document.createRange(); r.selectNode($("#exp-table",m)); const s = getSelection(); s.removeAllRanges(); s.addRange(r); };
+    const csvB = $("#x-csv",m); if(csvB) csvB.onclick = () => {
+      const q = (v) => '"'+String(v).replaceAll('"','""')+'"';
+      const csv = "﻿" + [head, ...rows].map(r => r.map(q).join(",")).join("\r\n") + "\r\n\r\n" + q(reportFootText()) + "\r\n";
+      const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); a.download = "global-trade-finder-"+new Date().toISOString().slice(0,10)+".csv"; document.body.appendChild(a); a.click(); a.remove(); };
+    const pB = $("#x-print",m); if(pB) pB.onclick = () => { document.body.classList.add("pr"); window.print(); setTimeout(()=>document.body.classList.remove("pr"), 500); };
+  });
+}
+
+/* ---------- Páginas legales ---------- */
+function vTerms(){
+  const es = LANG!=="en";
+  return `<div class="wrap page" style="max-width:780px"><h1>${t("terms_title")}</h1><div class="stack" style="margin-top:14px">
+  ${es ? `<p>Global Trade Finder es una aplicación de SkyNet Genesis que permite a empresas registrarse como compradoras, proveedoras o ambas, y buscar contrapartes por país, sector, producto y código HS.</p>
+  <p><b>Información de las empresas.</b> Cada empresa responde por la veracidad de los datos que publica. La marca "Verificada" indica que se revisaron sus documentos de existencia; no es una garantía comercial. Las operaciones se acuerdan directamente entre las partes.</p>
+  <p><b>Suscripción.</b> El registro básico es gratuito. Los planes Comprador, Proveedor y Comprador y proveedor se pagan por suscripción en skynetgenesis.com y pueden cancelarse en cualquier momento.</p>
+  <p><b>Uso permitido.</b> No se permite copiar masivamente el directorio, enviar publicidad no solicitada ni publicar productos de comercio prohibido.</p>
+  <p><b>Versión de demostración.</b> Las empresas mostradas son ficticias; sus nombres, correos y teléfonos se generan solo para pruebas.</p>`
+  : `<p>Global Trade Finder is a SkyNet Genesis application that lets companies list themselves as buyers, suppliers or both, and find counterparts by country, sector, product and HS code.</p>
+  <p><b>Company information.</b> Each company is responsible for the accuracy of what it publishes. The "Verified" mark means its registration documents were reviewed; it is not a commercial guarantee. Deals are agreed directly between the parties.</p>
+  <p><b>Subscription.</b> The basic listing is free. The Buyer, Supplier and Buyer & supplier plans are paid by subscription at skynetgenesis.com and can be cancelled at any time.</p>
+  <p><b>Permitted use.</b> Bulk copying of the directory, unsolicited advertising and listing prohibited goods are not allowed.</p>
+  <p><b>Demo version.</b> The companies shown are fictitious; their names, emails and phone numbers are generated for testing only.</p>`}
+  <p class="muted">SkyNet Genesis · ${SG.mail} · WhatsApp ${SG.wa}</p></div></div>`;
+}
+function vPrivacy(){
+  const es = LANG!=="en";
+  return `<div class="wrap page" style="max-width:780px"><h1>${t("privacy_title")}</h1><div class="stack" style="margin-top:14px">
+  ${es ? `<p>SkyNet Genesis trata los datos de las empresas y de sus personas de contacto conforme a la Ley 1581 de 2012 de Colombia y el Decreto 1377 de 2013.</p>
+  <p><b>Finalidad.</b> Publicar el perfil comercial de la empresa, permitir que otras empresas la encuentren, enviar alertas de oportunidades y gestionar la suscripción.</p>
+  <p><b>Derechos.</b> Usted puede conocer, actualizar, rectificar y pedir la supresión de sus datos, y revocar la autorización, escribiendo a ${SG.mail}.</p>
+  <p><b>En esta demostración</b> los datos que usted escribe se guardan solo en su navegador y no se envían a ningún servidor.</p>`
+  : `<p>SkyNet Genesis processes the data of companies and their contact persons under Colombian Law 1581 of 2012 and Decree 1377 of 2013.</p>
+  <p><b>Purpose.</b> To publish the company's business profile, let other companies find it, send opportunity alerts and manage the subscription.</p>
+  <p><b>Rights.</b> You may access, update, correct and request deletion of your data, and revoke your authorization, by writing to ${SG.mail}.</p>
+  <p><b>In this demo</b> the data you enter is stored only in your browser and is not sent to any server.</p>`}</div></div>`;
+}
+const vNotFound = () => `<div class="wrap page"><div class="empty"><b>404</b><a href="#inicio">${t("home")}</a></div></div>`;
+
+/* ---------- Enrutador ---------- */
+function render(){
+  const h = decodeURIComponent((location.hash||"#inicio").slice(1)) || "inicio";
+  const [r, a, b] = h.split("-");
+  let html, bind = null;
+  switch(r){
+    case "inicio": html = vHome(); bind = bindSearchBox; break;
+    case "buscar": html = vSearch(); bind = bindSearch; break;
+    case "mercados": html = vMarkets(); break;
+    case "region": html = vRegion(a); break;
+    case "sub": html = vSub(a+"-"+b); break;
+    case "pais": html = vCountry(a, b); bind = () => bindCountry(a, b); break;
+    case "pc": html = vCountryCode(a, b); break;
+    case "hs": if(a){ html = vCode(a); bind = () => bindCode(a); } else { html = vHS(); bind = bindHS; } break;
+    case "sec": html = vSection(a); break;
+    case "cap": html = vChapter(a); break;
+    case "empresas": html = vDirectory(); bind = bindDirectory; break;
+    case "empresa": html = vCompany(a); bind = () => bindCompany(a); break;
+    case "planes": html = vPlans(); bind = bindPlans; break;
+    case "registro": html = vRegister(); bind = bindRegister; break;
+    case "cuenta": html = vAccount(); bind = bindAccount; break;
+    case "terminos": html = vTerms(); break;
+    case "privacidad": html = vPrivacy(); break;
+    default: html = vNotFound();
+  }
+  if(r!=="registro") REG = null;
+  chrome();
+  V.innerHTML = html;
+  bind && bind();
+  $("#mainNav").classList.remove("open"); $("#menuBtn").setAttribute("aria-expanded","false");
+}
+let lastRoute = "";
+window.addEventListener("hashchange", () => {
+  const r = (location.hash||"#inicio").slice(1);
+  if(r!==lastRoute){ if(!r.startsWith("buscar") && !r.startsWith("empresas")) shown = PAGE; lastRoute = r; render(); window.scrollTo(0,0); }
+});
+$$(".lang button").forEach(b => b.onclick = () => { LANG = b.dataset.lang; store.set("lang", LANG); render(); });
+$("#menuBtn").onclick = () => { const n = $("#mainNav"); n.classList.toggle("open"); $("#menuBtn").setAttribute("aria-expanded", n.classList.contains("open")); };
+lastRoute = (location.hash||"#inicio").slice(1);
+render();
+
+</script>
+</body>
+</html>
