@@ -11,25 +11,16 @@
 <style>
 /* Layout: barra superior azul petróleo; buscador central con pestañas; vistas por ancla (#pais-CO, #hs-0901…) con migas de pan que siguen la ruta Continente → País → Sector → Producto → HS → Empresas */
 :root{
-  --petroleo:#1E3A4C; --petroleo-2:#2A4E64; --ambar:#E0A21A; --verde:#1F8A4C;
-  --bg:#EEF2F1; --surface:#FFFFFF; --text:#15232B; --muted:#4F6470; --line:#D5DFDD;
-  --chip:#E3EBEA; --bar:#1E3A4C; --soft-ambar:#FBF1DA; --soft-pet:#E2ECF1; --soft-verde:#E1F2E8;
-  --danger:#B53A2E; --on-dark:#FFFFFF; --link:#1E3A4C;
+  /* Paleta FamilIA Salud (solo modo claro) */
+  --petroleo:#0B4F8A; --petroleo-2:#1867B0; --ambar:#14A38B; --ambar-2:#0E8571; --verde:#1F8A4C;
+  --bg:#F4F8FB; --surface:#FFFFFF; --text:#1C2B39; --muted:#5D6B78; --line:#DCE5EE;
+  --chip:#E8F1FA; --bar:#FFFFFF; --soft-ambar:#E3F6F2; --soft-pet:#E8F1FA; --soft-verde:#E3F6F2;
+  --danger:#C0392B; --on-dark:#FFFFFF; --link:#0B4F8A;
   --f-title:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
   --f-text:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --f-mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  color-scheme:light;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --petroleo:#3C7393; --petroleo-2:#4B86A8; --ambar:#E9B23A; --verde:#2BA05E;
-  --bg:#0F1A20; --surface:#172731; --text:#E6EEF0; --muted:#9FB3BC; --line:#284050;
-  --chip:#20343F; --bar:#13293A; --soft-ambar:#2E2714; --soft-pet:#1B3240; --soft-verde:#16301F;
-  --danger:#E57366; --link:#8FC3E0; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --petroleo:#3C7393; --petroleo-2:#4B86A8; --ambar:#E9B23A; --verde:#2BA05E;
-  --bg:#0F1A20; --surface:#172731; --text:#E6EEF0; --muted:#9FB3BC; --line:#284050;
-  --chip:#20343F; --bar:#13293A; --soft-ambar:#2E2714; --soft-pet:#1B3240; --soft-verde:#16301F;
-  --danger:#E57366; --link:#8FC3E0; color-scheme:dark}
-
 *{box-sizing:border-box}
 html{scroll-padding-top:80px}
 body{background:var(--bg);color:var(--text);font-family:var(--f-text);font-size:15.5px;line-height:1.55;margin:0}
@@ -43,33 +34,38 @@ button,input,select,textarea{font:inherit;color:inherit}
 .num{font-variant-numeric:tabular-nums}
 
 /* Barra superior */
-.top{background:var(--bar);color:var(--on-dark);position:sticky;top:env(safe-area-inset-top,0px);z-index:30}
+.top{background:var(--bar);color:var(--text);box-shadow:0 2px 12px rgba(11,79,138,.10);position:sticky;top:env(safe-area-inset-top,0px);z-index:30}
 .top .wrap{display:flex;align-items:center;gap:14px;min-height:64px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;margin-right:auto}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--petroleo);margin-right:auto}
 .brand svg{width:40px;height:40px;flex:none}
 .brand .wm{display:flex;flex-direction:column;line-height:.95}
 .brand .wm b{font-family:var(--f-title);font-size:1.45rem;letter-spacing:.05em;text-transform:uppercase;font-weight:700}
-.brand .wm b span{color:var(--ambar)}
-.brand .wm small{font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:#B9CBD4;font-weight:600}
+.brand .wm b span{color:var(--ambar-2)}
+.brand .wm small{font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .nav{display:flex;gap:2px;flex-wrap:wrap;align-items:center}
-.nav a{color:#fff;text-decoration:none;padding:8px 11px;border-radius:6px;font-weight:600;font-size:.92rem;border-bottom:3px solid transparent}
-.nav a:hover{background:rgba(255,255,255,.08)}
+.nav a{color:var(--text);text-decoration:none;padding:8px 11px;border-radius:6px;font-weight:600;font-size:.92rem;border-bottom:3px solid transparent}
+.nav a:hover{background:var(--soft-pet)}
 .nav a.on{border-bottom-color:var(--ambar)}
-.nav a.cta{background:var(--ambar);color:#15232B}
-.lang{display:flex;border:1.5px solid rgba(255,255,255,.35);border-radius:7px;overflow:hidden}
-.lang button{background:transparent;border:0;color:#fff;padding:5px 9px;font-weight:700;font-size:.8rem;cursor:pointer}
-.lang button[aria-pressed="true"]{background:#fff;color:#1E3A4C}
-.menu-btn{display:none;background:transparent;border:1.5px solid rgba(255,255,255,.35);color:#fff;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer}
+.nav a.cta{background:var(--ambar-2);color:#fff}
+.lang{display:flex;border:1.5px solid var(--line);border-radius:7px;overflow:hidden}
+.lang button{background:transparent;border:0;color:var(--muted);padding:5px 9px;font-weight:700;font-size:.8rem;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--petroleo);color:#fff}
+.menu-btn{display:none;background:transparent;border:1.5px solid var(--line);color:var(--text);border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer}
 
 .demo-strip{background:var(--soft-ambar);border-bottom:1px solid var(--ambar);font-size:.85rem}
 .demo-strip .wrap{padding-block:7px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .demo-strip b{font-weight:700}
+.demo-strip .wrap{justify-content:space-between}
+.demo-try{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.demo-try .chip{background:var(--surface);border-color:var(--ambar)}
+.demo-lvl{display:flex;gap:6px;align-items:center;flex-wrap:wrap;width:100%}
+.demo-try .chip[aria-pressed="true"]{background:var(--ambar-2);border-color:var(--ambar-2);color:#fff}
 
 /* Botones */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border-radius:8px;border:0;cursor:pointer;font-weight:700;text-decoration:none;font-size:.94rem;line-height:1.2}
-.btn-main{background:var(--petroleo);color:#fff}
-.btn-main:hover{background:var(--petroleo-2)}
-.btn-amb{background:var(--ambar);color:#15232B}
+.btn-main{background:linear-gradient(135deg,var(--petroleo),var(--petroleo-2));color:#fff}
+.btn-main:hover{filter:brightness(1.08)}
+.btn-amb{background:var(--ambar-2);color:#fff}
 .btn-amb:hover{filter:brightness(1.06)}
 .btn-wa{background:var(--verde);color:#fff}
 .btn-wa:hover{filter:brightness(1.08)}
@@ -83,11 +79,9 @@ button,input,select,textarea{font:inherit;color:inherit}
 /* Portada */
 .hero{padding-block:44px 28px}
 .eyebrow{font-family:var(--f-title);text-transform:uppercase;letter-spacing:.14em;font-weight:700;color:var(--petroleo);font-size:.98rem;display:flex;align-items:center;gap:10px}
-:root[data-theme="dark"] .eyebrow{color:var(--link)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .eyebrow{color:var(--link)}}
 .eyebrow::before{content:"";width:26px;height:4px;border-radius:2px;background:var(--ambar);flex:none}
 .hero h1{font-size:clamp(2.3rem,5vw,3.9rem);text-transform:uppercase;margin-top:10px;letter-spacing:.005em;max-width:22ch}
-.hero h1 span{color:var(--ambar)}
+.hero h1 span{color:var(--ambar-2)}
 .hero p.lead{max-width:62ch;color:var(--muted);font-size:1.06rem;margin:14px 0 22px}
 
 .searchbox{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 8px 28px rgba(21,35,43,.08)}
@@ -176,7 +170,7 @@ section{padding-block:26px}
 .role.both{background:var(--soft-verde);color:var(--text);border:1px solid var(--verde)}
 .ver{color:var(--verde);font-weight:700;font-size:.8rem;display:inline-flex;gap:4px;align-items:center}
 .demo{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border:1px dashed var(--muted);border-radius:4px;padding:1px 5px}
-.mine{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:var(--ambar);color:#15232B;border-radius:4px;padding:2px 6px}
+.mine{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:var(--ambar-2);color:#fff;border-radius:4px;padding:2px 6px}
 
 table.t{width:100%;border-collapse:collapse;font-size:.92rem;font-variant-numeric:tabular-nums}
 table.t th{text-align:left;font-size:.76rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-bottom:2px solid var(--line);padding:8px 10px}
@@ -267,7 +261,7 @@ footer a:hover{color:var(--text)}
   .nav{display:none;width:100%;flex-direction:column;align-items:stretch;padding-bottom:10px}
   .nav.open{display:flex}
   .nav a{padding:11px 10px}
-  .nav a.on{border-bottom-color:transparent;background:rgba(255,255,255,.08)}
+  .nav a.on{border-bottom-color:transparent;background:var(--soft-pet)}
   .stats{grid-template-columns:1fr 1fr}
   .opts,.fields{grid-template-columns:1fr}
   .co{grid-template-columns:1fr}
@@ -296,7 +290,7 @@ footer a:hover{color:var(--text)}
 <header class="top">
   <div class="wrap">
     <a class="brand" href="#inicio" aria-label="Global Trade Finder">
-      <svg viewBox="0 0 200 200" aria-hidden="true"><rect x="4" y="4" width="192" height="192" rx="46" fill="#1E3A4C" stroke="rgba(255,255,255,.25)" stroke-width="4"/><g stroke="#FFFFFF" stroke-linecap="round"><polygon points="100,42 150.2,71 150.2,129 100,158 49.8,129 49.8,71" fill="none" stroke-opacity=".35" stroke-width="4"/><path d="M100 100L100 42M100 100L150.2 71M100 100L150.2 129M100 100L100 158M100 100L49.8 129M100 100L49.8 71" stroke-width="6"/></g><g fill="#FFFFFF"><circle cx="150.2" cy="71" r="10"/><circle cx="150.2" cy="129" r="10"/><circle cx="100" cy="158" r="10"/><circle cx="49.8" cy="129" r="10"/><circle cx="49.8" cy="71" r="10"/></g><circle cx="100" cy="42" r="13" fill="#E0A21A"/><circle cx="100" cy="100" r="20" fill="#E0A21A"/></svg>
+      <svg viewBox="0 0 200 200" aria-hidden="true"><rect x="4" y="4" width="192" height="192" rx="46" fill="#1E3A4C"/><g stroke="#FFFFFF" stroke-linecap="round"><polygon points="100,42 150.2,71 150.2,129 100,158 49.8,129 49.8,71" fill="none" stroke-opacity=".35" stroke-width="4"/><path d="M100 100L100 42M100 100L150.2 71M100 100L150.2 129M100 100L100 158M100 100L49.8 129M100 100L49.8 71" stroke-width="6"/></g><g fill="#FFFFFF"><circle cx="150.2" cy="71" r="10"/><circle cx="150.2" cy="129" r="10"/><circle cx="100" cy="158" r="10"/><circle cx="49.8" cy="129" r="10"/><circle cx="49.8" cy="71" r="10"/></g><circle cx="100" cy="42" r="13" fill="#E0A21A"/><circle cx="100" cy="100" r="20" fill="#E0A21A"/></svg>
       <span class="wm"><b>Global <span>Trade</span> Finder</b><small>by SkyNet Genesis</small></span>
     </a>
     <button type="button" class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="mainNav">Menú</button>
@@ -680,7 +674,14 @@ const FRAMED = (() => { try { return window.self !== window.top; } catch(e){ ret
 /* ---------- Almacenamiento seguro ---------- */
 const MEM = {};
 const store = {
-  get(k, d){ try { const v = localStorage.getItem("gtf-"+k); return v==null ? (k in MEM ? MEM[k] : d) : JSON.parse(v); } catch(e){ return k in MEM ? MEM[k] : d; } },
+  get(k, d){
+    let v;
+    try { const raw = localStorage.getItem("gtf-"+k); v = raw==null ? (k in MEM ? MEM[k] : d) : JSON.parse(raw); } catch(e){ v = k in MEM ? MEM[k] : d; }
+    if(v==null) return d;
+    if(Array.isArray(d) && !Array.isArray(v)) return d;           // datos corruptos: lista esperada
+    if(typeof d==="string" && typeof v!=="string") return d;
+    return v;
+  },
   set(k, v){ MEM[k] = v; try { localStorage.setItem("gtf-"+k, JSON.stringify(v)); } catch(e){} },
   del(k){ delete MEM[k]; try { localStorage.removeItem("gtf-"+k); } catch(e){} }
 };
@@ -689,6 +690,12 @@ const store = {
 let LANG = store.get("lang", (navigator.language||"es").slice(0,2)==="en" ? "en" : "es");
 const T = {
  es:{
+  err_qty:"Escriba una cantidad entre 1 y 10.000.000", demo_try:"Probar la demostración:", demo_obs:"Observador", demo_on:"Está en la demostración con la cuenta demo@skynetgenesis.com.", demo_exit:"Salir de la demostración", showing_last:"Se muestran las 100 más recientes.",
+ plan_free:"Registro gratuito (observador)", plan_free_who:"Solo para mirar la plataforma", pf1:"Navegar mercados, países y códigos HS", pf2:"Consultar el directorio de empresas", pf3:"Sin perfil de empresa ni datos de contacto", pf4:"Sin alertas, búsquedas guardadas, solicitudes ni exportación",
+  obs_title:"Registro gratuito de observador", obs_lead:"Con el registro gratuito puede navegar y consultar la plataforma. Para crear el perfil de su empresa, guardar búsquedas, crear alertas, enviar solicitudes, ver contactos o exportar necesita un plan de suscripción.", obs_name:"Nombre completo", obs_save:"Crear registro gratuito", obs_saved:"Registro gratuito creado. Ya puede navegar la plataforma.",
+  gate_title:"Disponible en los planes de suscripción", gate_msg:"Su registro gratuito es solo de observador: puede navegar y consultar, pero no {what}. Para hacerlo elija un plan Comprador, Proveedor o Comprador y proveedor.",
+  w_profile:"crear el perfil de su empresa", w_save:"guardar búsquedas", w_alert:"crear alertas", w_rfq:"enviar solicitudes ni ofertas", w_export:"exportar resultados",
+  nav_signup:"Registrarse gratis", acc_observer:"Cuenta de observador", obs_locked:"Las búsquedas guardadas, las alertas y las solicitudes están incluidas en los planes de suscripción.", create_profile:"Crear perfil de mi empresa", no_profile:"Su plan permite crear el perfil de su empresa en el directorio.",
   nav_search:"Buscar", nav_markets:"Mercados", nav_hs:"Códigos HS", nav_companies:"Empresas", nav_plans:"Planes", nav_account:"Mi cuenta", nav_register:"Registrar empresa",
   demo_strip:"<b>Versión de demostración.</b> Las empresas que aparecen son ficticias y sus datos se generan para pruebas. Lo que usted registre se guarda solo en este navegador.",
   eyebrow:"Global Trade Search & Intelligence",
@@ -706,27 +713,26 @@ const T = {
   sort_rel:"Relevancia", sort_name:"Nombre", sort_active:"Actividad reciente", sort_size:"Tamaño",
   save_search:"Guardar búsqueda", saved_ok:"Búsqueda guardada en Mi cuenta", export:"Exportar", create_alert:"Crear alerta",
   view_profile:"Ver perfil", verified:"Verificada", demo:"Demo", yours:"Su empresa",
-  founded:"Fundada", employees:"Empleados", volume:"Volumen anual", active:"Activa hace", days:"días", today:"hoy",
+  founded:"Fundada", employees:"Empleados", volume:"Volumen anual", active:"Última actividad", days:"días", today:"hoy",
   about:"Acerca de la empresa", products:"Productos y códigos HS", markets_served:"Mercados", sourcing_from:"Compra en", selling_to:"Vende a",
   certs:"Certificaciones", incoterms:"Incoterms habituales", contact:"Contacto", contact_dept:"Área", email:"Correo", phone:"Teléfono", website:"Sitio web",
   locked_title:"Datos de contacto reservados para suscriptores", locked_buyers:"Para ver el contacto de compradores necesita el plan Proveedor o Comprador y proveedor.", locked_suppliers:"Para ver el contacto de proveedores necesita el plan Comprador o Comprador y proveedor.",
   see_plans:"Ver planes", request_contact:"Solicitar contacto", send_rfq:"Enviar solicitud de cotización", send_offer:"Enviar oferta",
   rfq_title:"Solicitud de cotización", offer_title:"Oferta comercial", rfq_product:"Producto (código HS)", rfq_qty:"Cantidad", rfq_unit:"Unidad", rfq_incoterm:"Incoterm", rfq_dest:"Puerto o ciudad de destino", rfq_msg:"Mensaje",
   rfq_note:"En la versión de demostración la solicitud se guarda en Mi cuenta y no se envía a la empresa.", cancel:"Cancelar", save:"Guardar", close:"Cerrar", send:"Guardar solicitud",
-  rfq_ok:"Solicitud guardada en Mi cuenta", need_account:"Primero registre su empresa (es gratis) para enviar solicitudes.",
+  rfq_ok:"Solicitud guardada en Mi cuenta", need_account:"Primero cree el perfil de su empresa para enviar solicitudes y alertas.",
   country_suppliers:"Proveedores en", country_buyers:"Compradores en", top_hs:"Principales códigos HS", by_sector:"Empresas por sector", select_sector:"Elija un sector", all_sectors:"Todos los sectores", products_in:"Productos en",
   hs_title:"Sistema Armonizado (HS 2022)", hs_lead:"La clasificación internacional de mercancías de la Organización Mundial de Aduanas: 21 secciones, 96 capítulos, partidas de 4 dígitos y subpartidas de 6 dígitos. Busque un código o navegue por sección.",
   hs_search_ph:"Código o descripción. Ej.: 0603, flores, acero", section:"Sección", chapter:"Capítulo", heading:"Partida", subheading:"Subpartida", chapters:"capítulos",
   hs_no_codes:"Este capítulo aún no tiene partidas cargadas con empresas en la versión de demostración.", where_trade:"Dónde se comercia", world:"Mundo", companies_with:"empresas con este código",
   markets_title:"Mercados del mundo", markets_lead:"Elija un continente, luego la subregión y el país para ver sus compradores y proveedores por sector y producto.",
   dir_title:"Directorio de empresas", dir_lead:"Compradores y proveedores registrados. Use los filtros para encontrar socios por país, sector y código HS.",
-  plans_title:"Planes de suscripción", plans_lead:"Regístrese gratis como comprador, proveedor o ambos. Suscríbase para ver contactos, enviar solicitudes sin límite y recibir alertas de oportunidades.",
-  plan_free:"Registro gratuito", plan_free_who:"Para conocer la plataforma", plan_buyer_who:"Encuentre proveedores", plan_supplier_who:"Encuentre compradores", plan_both_who:"Acceso completo",
+  plans_title:"Planes de suscripción", plans_lead:"El registro gratuito es de observador: navega y consulta la plataforma. Suscríbase como comprador, proveedor o ambos para crear el perfil de su empresa, ver contactos, enviar solicitudes y recibir alertas de oportunidades.",
+  plan_buyer_who:"Encuentre proveedores", plan_supplier_who:"Encuentre compradores", plan_both_who:"Acceso completo",
   price_free:"Gratis", price_quote:"Precio en skynetgenesis.com", recommended:"Recomendado", current:"Plan actual",
-  pf1:"Buscador y navegación por mercados y códigos HS", pf2:"Perfil de su empresa en el directorio", pf3:"3 solicitudes al mes", pf4:"1 alerta",
   pb1:"Contacto completo de proveedores", pb2:"Solicitudes de cotización sin límite", pb3:"10 alertas de nuevos proveedores", pb4:"Exportación de resultados",
   ps1:"Contacto completo de compradores", ps2:"Perfil destacado en las búsquedas", ps3:"10 alertas de nuevos compradores", ps4:"Ofertas comerciales sin límite",
-  pa1:"Todo lo de Comprador y Proveedor", pa2:"Alertas ilimitadas", pa3:"Informes por país y código HS", pa4:"Varios usuarios por empresa",
+  pa1:"Todo lo de Comprador y Proveedor", pa2:"Alertas ilimitadas", pa3:"Informes por país y código HS", pa4:"Soporte prioritario por WhatsApp",
   hire:"Contratar", try_demo:"Probar este plan (demo)", demo_plan_on:"Plan de demostración activado:", using_free:"Está usando el registro gratuito.",
   reg_title:"Registrar empresa", reg_edit:"Editar mi empresa", reg_lead:"Su empresa aparecerá en el directorio y podrá buscar, guardar búsquedas, crear alertas y enviar solicitudes.",
   reg_profile:"¿Cómo participa en el comercio internacional?", reg_buyer_d:"Importa o compra insumos y productos", reg_supplier_d:"Exporta o vende productos", reg_both_d:"Compra y vende",
@@ -735,7 +741,7 @@ const T = {
   err_req:"Este dato es obligatorio", err_email:"Escriba un correo válido, por ejemplo ventas@empresa.com", err_hs:"Agregue al menos un producto o código HS", err_accept:"Debe aceptar para continuar", err_profile:"Elija un perfil",
   acc_title:"Mi cuenta", acc_none:"Aún no ha registrado su empresa", acc_none_d:"El registro es gratis y toma dos minutos.", my_company:"Mi empresa", my_plan:"Mi plan", saved_searches:"Búsquedas guardadas", alerts:"Alertas", requests:"Solicitudes enviadas",
   none_saved:"Todavía no tiene búsquedas guardadas.", none_alerts:"Todavía no tiene alertas.", none_requests:"Todavía no ha enviado solicitudes.",
-  run:"Abrir", del:"Eliminar", edit:"Editar", logout:"Salir de esta cuenta", logout_confirm:"¿Seguro? Se borrarán de este navegador su empresa, búsquedas, alertas y solicitudes.", yes_delete:"Sí, borrar", matches_now:"coincidencias hoy",
+  run:"Abrir", del:"Eliminar", edit:"Editar", logout:"Salir de esta cuenta", logout_confirm:"¿Seguro? Se borrarán de este navegador su registro, su empresa, búsquedas, alertas y solicitudes.", yes_delete:"Sí, borrar", matches_now:"coincidencias hoy",
   alert_title:"Nueva alerta", alert_lead:"Le avisaremos cuando aparezcan empresas nuevas que coincidan.", alert_what:"Buscar", alert_name:"Nombre de la alerta", alert_freq:"Frecuencia", daily:"Diaria", weekly:"Semanal", alert_ok:"Alerta creada", alert_limit:"Llegó al límite de alertas de su plan.",
   limit_req:"Llegó al límite de 3 solicitudes del registro gratuito este mes.",
   export_title:"Exportar resultados", export_lead:"Vista previa del informe. Incluye hasta 200 filas.", copy:"Copiar tabla", copied:"Tabla copiada", download_csv:"Descargar CSV", print:"Imprimir o guardar PDF",
@@ -752,6 +758,12 @@ const T = {
   ent_kind:"del sector"
  },
  en:{
+  err_qty:"Enter a quantity between 1 and 10,000,000", demo_try:"Try the demo:", demo_obs:"Observer", demo_on:"You are in the demo with the account demo@skynetgenesis.com.", demo_exit:"Leave the demo", showing_last:"Showing the 100 most recent.",
+ plan_free:"Free sign-up (observer)", plan_free_who:"Just to look around", pf1:"Browse markets, countries and HS codes", pf2:"View the company directory", pf3:"No company profile or contact details", pf4:"No alerts, saved searches, requests or export",
+  obs_title:"Free observer sign-up", obs_lead:"With the free sign-up you can browse and look up the platform. To create your company profile, save searches, create alerts, send requests, see contacts or export you need a subscription plan.", obs_name:"Full name", obs_save:"Create free sign-up", obs_saved:"Free sign-up created. You can now browse the platform.",
+  gate_title:"Available in subscription plans", gate_msg:"Your free sign-up is observer-only: you can browse and look things up, but you cannot {what}. To do so, choose a Buyer, Supplier or Buyer & supplier plan.",
+  w_profile:"create your company profile", w_save:"save searches", w_alert:"create alerts", w_rfq:"send requests or offers", w_export:"export results",
+  nav_signup:"Sign up free", acc_observer:"Observer account", obs_locked:"Saved searches, alerts and requests are included in the subscription plans.", create_profile:"Create my company profile", no_profile:"Your plan lets you create your company profile in the directory.",
   nav_search:"Search", nav_markets:"Markets", nav_hs:"HS codes", nav_companies:"Companies", nav_plans:"Plans", nav_account:"My account", nav_register:"List your company",
   demo_strip:"<b>Demo version.</b> The companies shown are fictitious and generated for testing. Anything you register is saved only in this browser.",
   eyebrow:"Global Trade Search & Intelligence",
@@ -769,28 +781,27 @@ const T = {
   sort_rel:"Relevance", sort_name:"Name", sort_active:"Recent activity", sort_size:"Size",
   save_search:"Save search", saved_ok:"Search saved to My account", export:"Export", create_alert:"Create alert",
   view_profile:"View profile", verified:"Verified", demo:"Demo", yours:"Your company",
-  founded:"Founded", employees:"Employees", volume:"Annual volume", active:"Active", days:"days ago", today:"today",
+  founded:"Founded", employees:"Employees", volume:"Annual volume", active:"Last activity", days:"days ago", today:"today",
   about:"About the company", products:"Products and HS codes", markets_served:"Markets", sourcing_from:"Sources from", selling_to:"Sells to",
   certs:"Certifications", incoterms:"Usual Incoterms", contact:"Contact", contact_dept:"Department", email:"Email", phone:"Phone", website:"Website",
   locked_title:"Contact details are for subscribers", locked_buyers:"To see buyer contacts you need the Supplier or Buyer & supplier plan.", locked_suppliers:"To see supplier contacts you need the Buyer or Buyer & supplier plan.",
   see_plans:"See plans", request_contact:"Request contact", send_rfq:"Send request for quotation", send_offer:"Send offer",
   rfq_title:"Request for quotation", offer_title:"Commercial offer", rfq_product:"Product (HS code)", rfq_qty:"Quantity", rfq_unit:"Unit", rfq_incoterm:"Incoterm", rfq_dest:"Destination port or city", rfq_msg:"Message",
   rfq_note:"In the demo version the request is saved to My account and is not sent to the company.", cancel:"Cancel", save:"Save", close:"Close", send:"Save request",
-  rfq_ok:"Request saved to My account", need_account:"List your company first (it's free) to send requests.",
+  rfq_ok:"Request saved to My account", need_account:"Create your company profile first to send requests and alerts.",
   country_suppliers:"Suppliers in", country_buyers:"Buyers in", top_hs:"Top HS codes", by_sector:"Companies by sector", select_sector:"Choose a sector", all_sectors:"All sectors", products_in:"Products in",
   hs_title:"Harmonized System (HS 2022)", hs_lead:"The World Customs Organization's international goods classification: 21 sections, 96 chapters, 4-digit headings and 6-digit subheadings. Search a code or browse by section.",
   hs_search_ph:"Code or description. E.g. 0603, flowers, steel", section:"Section", chapter:"Chapter", heading:"Heading", subheading:"Subheading", chapters:"chapters",
   hs_no_codes:"This chapter has no headings with companies in the demo version yet.", where_trade:"Where it is traded", world:"World", companies_with:"companies with this code",
   markets_title:"World markets", markets_lead:"Choose a continent, then the subregion and country to see its buyers and suppliers by sector and product.",
   dir_title:"Company directory", dir_lead:"Registered buyers and suppliers. Use the filters to find partners by country, sector and HS code.",
-  plans_title:"Subscription plans", plans_lead:"List your company for free as a buyer, supplier or both. Subscribe to see contacts, send unlimited requests and get opportunity alerts.",
-  plan_free:"Free listing", plan_free_who:"Get to know the platform", plan_buyer_who:"Find suppliers", plan_supplier_who:"Find buyers", plan_both_who:"Full access",
+  plans_title:"Subscription plans", plans_lead:"The free sign-up is observer-only: browse and look up the platform. Subscribe as a buyer, supplier or both to create your company profile, see contacts, send requests and get opportunity alerts.",
+  plan_buyer_who:"Find suppliers", plan_supplier_who:"Find buyers", plan_both_who:"Full access",
   price_free:"Free", price_quote:"Price at skynetgenesis.com", recommended:"Recommended", current:"Current plan",
-  pf1:"Search and browse markets and HS codes", pf2:"Your company profile in the directory", pf3:"3 requests per month", pf4:"1 alert",
   pb1:"Full supplier contact details", pb2:"Unlimited requests for quotation", pb3:"10 new-supplier alerts", pb4:"Export results",
   ps1:"Full buyer contact details", ps2:"Featured profile in searches", ps3:"10 new-buyer alerts", ps4:"Unlimited commercial offers",
-  pa1:"Everything in Buyer and Supplier", pa2:"Unlimited alerts", pa3:"Reports by country and HS code", pa4:"Multiple users per company",
-  hire:"Subscribe", try_demo:"Try this plan (demo)", demo_plan_on:"Demo plan active:", using_free:"You are on the free listing.",
+  pa1:"Everything in Buyer and Supplier", pa2:"Unlimited alerts", pa3:"Reports by country and HS code", pa4:"Priority WhatsApp support",
+  hire:"Subscribe", try_demo:"Try this plan (demo)", demo_plan_on:"Demo plan active:", using_free:"You are on the free observer sign-up.",
   reg_title:"List your company", reg_edit:"Edit my company", reg_lead:"Your company will appear in the directory and you can search, save searches, create alerts and send requests.",
   reg_profile:"How do you take part in international trade?", reg_buyer_d:"You import or buy products and inputs", reg_supplier_d:"You export or sell products", reg_both_d:"You buy and sell",
   r_name:"Company name", r_taxid:"Tax ID (NIT, RUT, VAT…)", r_country:"Country", r_city:"City", r_sector:"Main sector", r_hs:"Products or HS codes", r_hs_ph:"Type and choose. E.g. coffee, 0901", r_web:"Website", r_contact:"Contact person", r_role:"Job title", r_email:"Email", r_phone:"Phone / WhatsApp", r_desc:"Short description", r_markets:"Target markets", r_accept:"I accept the terms of use and authorize the processing of my company's data.",
@@ -920,13 +931,23 @@ const cityOf = (co) => co.city || cname(co.cc);
 /* ---------- Cuenta y plan (en este navegador) ---------- */
 let ACC = store.get("account", null);    // empresa registrada por el usuario
 let PLAN = store.get("plan", "free");    // free | buyer | supplier | both
-const allCompanies = () => ACC ? [accCompany(), ...DEMO] : DEMO;
+let OBS = store.get("observer", null);   // registro gratuito de observador
+/* descarta datos guardados dañados o de versiones anteriores */
+if(!["free","buyer","supplier","both"].includes(PLAN)) PLAN = "free";
+if(ACC && (typeof ACC!=="object" || typeof ACC.name!=="string" || !["buyer","supplier","both"].includes(ACC.role) || !Array.isArray(ACC.codes) || !COUNTRY[ACC.cc] || !SECTOR[ACC.sector])) ACC = null;
+if(ACC){ ACC.codes = ACC.codes.filter(c => CODE[c]||CHAP[c]); ACC.markets = Array.isArray(ACC.markets) ? ACC.markets.filter(c=>COUNTRY[c]) : []; if(!ACC.codes.length) ACC = null; }
+if(OBS && (typeof OBS!=="object" || typeof OBS.name!=="string" || typeof OBS.email!=="string")) OBS = null;
+if(OBS && !COUNTRY[OBS.cc]) OBS.cc = "CO";
+const PAID = () => PLAN !== "free";
+const LOGGED = () => !!(OBS || ACC);
+const allCompanies = () => (ACC && PAID()) ? [accCompany(), ...DEMO] : DEMO;
 function accCompany(){ return { id:"me", demo:false, mine:true, name:ACC.name, cc:ACC.cc, city:ACC.city, role:ACC.role, codes:ACC.codes, sector:ACC.sector,
   founded:null, emp:null, vol:null, verified:false, active:0, certs:[], inc:[], markets:ACC.markets||[], web:ACC.web, email:ACC.email, phone:ACC.phone, desc:ACC.desc, contact:ACC.contact, jobrole:ACC.jobrole }; }
 const getCo = (id) => allCompanies().find(c => c.id===id);
 /* ¿puede ver el contacto de esta empresa? */
 function canSee(co){
   if(co.mine) return true;
+  if(typeof can==='function' && !can('contacts')) return false;   // nivel de usuario sin acceso a contactos
   if(PLAN==="both") return true;
   if(PLAN==="buyer") return co.role!=="buyer";      // ve proveedores (y mixtas)
   if(PLAN==="supplier") return co.role!=="supplier"; // ve compradores (y mixtas)
@@ -1044,9 +1065,15 @@ function chrome(){
   const map = {region:"mercados",sub:"mercados",pais:"mercados",pc:"mercados",sec:"hs",cap:"hs",empresa:"empresas"};
   const active = map[cur] || cur;
   $("#mainNav").innerHTML = items.map(([h,k])=>`<a href="#${h}" class="${active===h?'on':''}">${t(k)}</a>`).join("") +
-    (ACC ? `<a href="#cuenta" class="${active==='cuenta'?'on':''}">${t("nav_account")}</a>` : `<a href="#registro" class="cta">${t("nav_register")}</a>`);
+    (LOGGED() ? `<a href="#cuenta" class="${active==='cuenta'?'on':''}">${t("nav_account")}</a>` : `<a href="#registro" class="cta">${t("nav_signup")}</a>`);
   $$(".lang button").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang===LANG));
-  $("#demoStrip").innerHTML = `<div class="wrap">${t("demo_strip")}</div>`;
+  const inDemo = (OBS && OBS.email===DEMO_EMAIL) || (ACC && ACC.email===DEMO_EMAIL);
+  $("#demoStrip").innerHTML = `<div class="wrap"><span>${t("demo_strip")}</span>
+    <span class="demo-try">${inDemo ? `<b>${t("demo_on")}</b> ${[["free","demo_obs"],["buyer","buyer"],["supplier","supplier"],["both","both"]].filter(([p])=>p!==PLAN).map(([p,k])=>`<button type="button" class="chip" data-start-demo="${p}">${t(k)}</button>`).join(" ")} <button type="button" class="linkbtn" data-demo-exit>${t("demo_exit")}</button>${PAID() && ACC ? `<span class="demo-lvl"><b>${t("lvl_demo")}</b> ${LEVELS.map(l=>`<button type="button" class="chip" data-lvl="${l}" aria-pressed="${ULEVEL===l}">${t("lvl_"+l)}</button>`).join(" ")}</span>` : ""}`
+      : LOGGED() ? "" : `<b>${t("demo_try")}</b> ${[["free","demo_obs"],["buyer","buyer"],["supplier","supplier"],["both","both"]].map(([p,k])=>`<button type="button" class="chip" data-start-demo="${p}">${t(k)}</button>`).join(" ")}`}</span></div>`;
+  $$("[data-start-demo]").forEach(b => b.onclick = () => startDemo(b.dataset.startDemo));
+  const ex = $("[data-demo-exit]"); if(ex) ex.onclick = exitDemo;
+  $$("[data-lvl]").forEach(b => b.onclick = () => setLevel(b.dataset.lvl));
   $("#footTxt").textContent = t("footer",{y:new Date().getFullYear()});
   $("#footLinks").innerHTML = `<a href="#terminos">${t("terms")}</a><a href="#privacidad">${t("privacy")}</a><a href="https://skynetgenesis.com" target="_blank" rel="noopener">skynetgenesis.com</a>`;
   $("#waTxt").textContent = t("support");
@@ -1106,6 +1133,9 @@ function vHome(){
     <h1>Find Buyers. <span>Find Suppliers.</span> Explore Global Markets.</h1>
     <p class="lead">${t("hero_lead")}</p>
     ${searchBox()}
+  </div>
+  ${howBlock()}
+  <div>
     <div class="path" aria-label="${esc(t("path_title"))}">
       ${[["lv_cont","5"],["lv_sub","20"],["lv_country",ALL_CC.length],["lv_sector",SECTORS.length],["lv_product",Object.keys(CODE).length],["lv_hs","HS 2022"],["lv_comp",allCompanies().length]].map(([k,v])=>`<div><b>${t(k)}</b><span class="num">${v}</span></div>`).join("")}
     </div>
@@ -1221,7 +1251,27 @@ function describeSearch(f){
   if(f.verified) parts.push(t("verified"));
   return parts.join(" · ");
 }
+/* demostración pública con la cuenta demo@skynetgenesis.com */
+const DEMO_EMAIL = "demo@skynetgenesis.com";
+function startDemo(plan){
+  OBS = { name:"Cuenta de demostración", email:DEMO_EMAIL, cc:"CO", at:new Date().toISOString() };
+  PLAN = plan;
+  ACC = plan==="free" ? null : { role:plan, name:"Empresa Demo SkyNet S.A.S.", taxid:"900000000-0", cc:"CO", city:"Santa Marta", sector:"agro",
+    codes: plan==="buyer" ? ["8471","3004"] : plan==="supplier" ? ["090111","080440"] : ["090111","8471"], markets:["US","DE","NL"],
+    web:"www.skynetgenesis.com", contact:"Usuario demo", jobrole:"Gerencia", email:DEMO_EMAIL, phone:"304 437 5758",
+    desc: LANG==="en" ? "Demo company to try Global Trade Finder." : "Empresa de demostración para probar Global Trade Finder.", ok:true };
+  ["saved","alerts","requests","users"].forEach(store.del); ULEVEL = "admin"; store.set("ulevel","admin");
+  store.set("observer", OBS); store.set("plan", PLAN); if(ACC) store.set("account", ACC); else store.del("account");
+  toast(t("demo_on")); go(plan==="free" ? "cuenta" : "empresa-me");
+}
+/* la demostración solo se ofrece a visitantes o a quien ya está en ella, para no borrar datos de una cuenta real */
+const isDemo = () => (OBS && OBS.email===DEMO_EMAIL) || (ACC && ACC.email===DEMO_EMAIL);
+const canDemo = () => !LOGGED() || isDemo();
+function exitDemo(){ ["account","saved","alerts","requests","plan","observer","ulevel","users"].forEach(store.del); ACC=null; OBS=null; PLAN="free"; ULEVEL="admin"; go("inicio"); }
+/* bloqueo del registro gratuito (solo observador) */
+function gate(what){ if(PAID()) return false; modal(`<h2>${t("gate_title")}</h2><p>${t("gate_msg",{what:t(what)})}</p><div class="acts"><button class="btn btn-ghost" data-close>${t("close")}</button><a class="btn btn-main" href="#planes" data-close>${t("see_plans")}</a></div>`); return true; }
 function saveSearch(){
+  if(gateP("save","w_save")) return;
   const list = store.get("saved", []);
   const f = {...S}; delete f.sort;
   list.unshift({ id:Date.now(), f, at:new Date().toISOString() });
@@ -1412,7 +1462,7 @@ function vCompany(id){
     <div class="stack">
       <div class="panel"><h2>${t("about")}</h2><p style="margin:0 0 12px">${esc(coDesc(co))}</p>
         <dl class="kv">${co.founded?`<dt>${t("founded")}</dt><dd class="num">${co.founded}</dd>`:""}${co.emp?`<dt>${t("employees")}</dt><dd>${t("emp_"+co.emp)}</dd>`:""}${co.vol?`<dt>${t("volume")}</dt><dd>${t("vol_"+co.vol)}</dd>`:""}
-        <dt>${t("active")}</dt><dd>${co.active===0?t("today"):(LANG==="en"?co.active+" "+t("days"):co.active+" "+t("days"))}</dd></dl></div>
+        <dt>${t("active")}</dt><dd>${co.active===0?t("today"):(LANG==="en"?co.active+" "+t("days"):"hace "+co.active+" "+t("days"))}</dd></dl></div>
       <div class="panel"><h2>${t("products")}</h2>${codesTable(co.codes)}</div>
       <div class="panel"><h2>${isSup?t("selling_to"):t("sourcing_from")}</h2><div style="display:flex;gap:6px;flex-wrap:wrap">${(co.markets.length?co.markets:[]).map(cc=>`<a class="chip" href="#pais-${cc}">${ccTag(cc)} ${esc(cname(cc))}</a>`).join("") || `<span class="muted">${t("world")}</span>`}</div>
         ${co.certs.length?`<h2 style="margin-top:16px">${t("certs")}</h2><div style="display:flex;gap:6px;flex-wrap:wrap">${co.certs.map(c=>`<span class="chip">${esc(c)}</span>`).join("")}</div>`:""}
@@ -1420,7 +1470,7 @@ function vCompany(id){
     </div>
     <div class="stack">
       <div class="panel"><h2>${t("contact")}</h2>${contact}</div>
-      ${co.mine ? `<a class="btn btn-main" href="#registro">${t("reg_edit")}</a>` : `<div class="panel" style="display:flex;flex-direction:column;gap:8px">
+      ${co.mine ? (can("profile") ? `<a class="btn btn-main" href="#registro">${t("reg_edit")}</a>` : "") : `<div class="panel" style="display:flex;flex-direction:column;gap:8px">
         <button class="btn btn-main" id="b-rfq">${isSup?t("send_rfq"):t("send_offer")}</button>
         <button class="btn btn-ghost" id="b-contact">${t("request_contact")}</button></div>`}
     </div>
@@ -1444,16 +1494,219 @@ function vPlans(){
   return `<div class="wrap page">${crumbs([{label:t("home"),href:"#inicio"},{label:t("nav_plans")}])}
   <h1>${t("plans_title")}</h1><p class="lead">${t("plans_lead")}</p>
   <div class="plans" style="margin-top:18px">${PLANS.map(p=>`<div class="plan ${p.rec?"rec":""}">
-    ${PLAN===p.id?`<span class="badge-cur">${t("current")}</span>`:p.rec?`<span class="badge-cur" style="background:var(--ambar);color:#15232B">${t("recommended")}</span>`:""}
+    ${PLAN===p.id?`<span class="badge-cur">${t("current")}</span>`:p.rec?`<span class="badge-cur" style="background:var(--ambar-2);color:#fff">${t("recommended")}</span>`:""}
     <h3>${t(p.name)}</h3><div class="who">${t(p.who)}</div>
-    <div class="price">${p.id==="free"?t("price_free"):t("price_quote")}</div>
+    <div class="price">${p.id==="free"?t("price_free"):money(PRICES[p.id])+` <span class="who">${t("per_month")}</span>`}</div>${p.id==="free"?"":`<div class="who"><b>${t("users_incl")}</b></div>`}
     <ul>${p.feats.map(f=>`<li>${t(f)}</li>`).join("")}</ul>
-    <div class="acts">${p.id==="free" ? (ACC?"":`<a class="btn btn-main" href="#registro">${t("nav_register")}</a>`) : `<a class="btn btn-main" href="${CATALOG_URL}" target="_blank" rel="noopener">${t("hire")}</a><button class="btn btn-ghost btn-sm" data-demo="${p.id}" ${PLAN===p.id?"disabled":""}>${t("try_demo")}</button>`}
-    ${p.id==="free" && PLAN!=="free" ? `<button class="btn btn-ghost btn-sm" data-demo="free">${t("try_demo")}</button>`:""}</div>
+    <div class="acts">${p.id==="free" ? (LOGGED()?"":`<a class="btn btn-main" href="#registro">${t("nav_signup")}</a>`) : `<a class="btn btn-main" href="${CATALOG_URL}" target="_blank" rel="noopener">${t("hire")}</a>${canDemo() ? `<button class="btn btn-ghost btn-sm" data-demo="${p.id}" ${PLAN===p.id?"disabled":""}>${t("try_demo")}</button>` : ""}`}
+    ${p.id==="free" && PLAN!=="free" && canDemo() ? `<button class="btn btn-ghost btn-sm" data-demo="free">${t("try_demo")}</button>`:""}</div>
   </div>`).join("")}</div>
   <p class="muted" style="margin-top:14px;font-size:.9rem">${PLAN==="free"?t("using_free"):t("demo_plan_on")+" <b>"+t(PLAN)+"</b>"}</p></div>`;
 }
-function bindPlans(){ $$("[data-demo]").forEach(b => b.onclick = () => { PLAN = b.dataset.demo; store.set("plan", PLAN); toast(PLAN==="free"?t("using_free"):t("demo_plan_on")+" "+t(PLAN)); render(); }); }
+function bindPlans(){ $$("[data-demo]").forEach(b => b.onclick = () => startDemo(b.dataset.demo)); }
+
+/* ================================================================
+   GLOBAL TRADE FINDER — niveles de usuario, equipo, plan y pagos,
+   botón "atrás" y guía de uso
+   ================================================================ */
+Object.assign(T.es, {
+  per_month:"/ mes", users_incl:"Usuarios ilimitados, sin costo por usuario.", monthly_value:"Valor mensual", users_count:"Usuarios: {a} · ilimitados, sin costo adicional",
+  lvl_title:"Nivel de usuario", lvl_demo:"Nivel de usuario:",
+  lvl_admin:"Administrador", lvl_director:"Director comercial", lvl_asesor:"Asesor comercial", lvl_analista:"Analista de mercados", lvl_consulta:"Solo consulta",
+  lvl_admin_d:"Maneja usuarios, plan y pagos, y el perfil de la empresa. Ve y hace todo.",
+  lvl_director_d:"Ve contactos, envía solicitudes y ofertas, aprueba las de los asesores y exporta informes.",
+  lvl_asesor_d:"Busca empresas, ve contactos y prepara solicitudes y ofertas, que quedan pendientes de aprobación.",
+  lvl_analista_d:"Estudia mercados, guarda búsquedas, crea alertas y exporta informes. No ve contactos ni envía nada.",
+  lvl_consulta_d:"Mira el directorio y los mercados. No ve contactos ni hace acciones.",
+  perm_title:"No disponible para su nivel de usuario", perm_msg:"Su nivel de usuario ({lvl}) no permite {what}. Si lo necesita, pídaselo al administrador de su empresa.",
+  w_contacts:"ver datos de contacto", w_approve:"aprobar solicitudes", w_users:"administrar usuarios", w_billing:"ver el plan y los pagos",
+  team:"Usuarios de la empresa", team_add:"Agregar usuario", team_email:"Correo del usuario", team_level:"Nivel", team_added:"Usuario agregado", team_removed:"Usuario retirado", team_you:"Usted", team_note:"En la versión real, cada usuario recibe una invitación por correo y crea su propia contraseña.", team_dup:"Ese correo ya está en la lista", team_remove:"Retirar",
+  billing:"Plan y pagos", paid_until:"Pagado hasta", bill_status:"Estado", st_active:"Activa", st_demo:"Demostración sin cobro", pay_bold:"Pagar en línea con Bold",
+  bold_demo_title:"Pago en línea con Bold", bold_demo_msg:"En la demostración no se cobra. En la versión real este botón abre la pasarela segura de Bold (tarjeta, PSE, Nequi y otros medios) y, cuando el pago se aprueba, la cuenta de la empresa queda al día sola, sin enviar comprobantes.",
+  bill_other:"El plan y los pagos los gestiona el administrador de su empresa.",
+  status_sent:"Enviada", status_pending:"Por aprobar", status_rejected:"Rechazada",
+  to_approve:"Solicitudes por aprobar", approve:"Aprobar", reject:"Rechazar", approved_ok:"Solicitud aprobada y enviada", rejected_ok:"Solicitud rechazada", none_pending:"No hay solicitudes por aprobar.",
+  rfq_pending_ok:"Solicitud guardada. Queda pendiente de aprobación del director comercial.", by:"Preparada por",
+  back_exit:"Pulse \"atrás\" otra vez para salir de Global Trade Finder.",
+  how_title:"¿Para qué le sirve a su empresa?",
+  how1_t:"Vender afuera", how1_d:"Encuentre compradores de su producto en otros países y envíeles una oferta.", how1_b:"Buscar compradores",
+  how2_t:"Comprar afuera", how2_d:"Encuentre proveedores de lo que necesita y pídales una cotización.", how2_b:"Buscar proveedores",
+  how3_t:"Estudiar mercados", how3_d:"Antes de exportar, vea en qué países se compra su producto y cuántas empresas hay.", how3_b:"Explorar mercados",
+  how_steps:"1. Busque por producto o código HS · 2. Revise el perfil de la empresa · 3. Envíe su oferta o solicitud · 4. Reciba alertas de nuevas oportunidades"
+});
+Object.assign(T.en, {
+  per_month:"/ month", users_incl:"Unlimited users, no per-user fee.", monthly_value:"Monthly amount", users_count:"Users: {a} · unlimited, no extra cost",
+  lvl_title:"User level", lvl_demo:"User level:",
+  lvl_admin:"Administrator", lvl_director:"Sales director", lvl_asesor:"Sales advisor", lvl_analista:"Market analyst", lvl_consulta:"View only",
+  lvl_admin_d:"Manages users, plan, payments and the company profile. Sees and does everything.",
+  lvl_director_d:"Sees contacts, sends requests and offers, approves the advisors' ones and exports reports.",
+  lvl_asesor_d:"Searches companies, sees contacts and prepares requests and offers, which wait for approval.",
+  lvl_analista_d:"Studies markets, saves searches, creates alerts and exports reports. Does not see contacts or send anything.",
+  lvl_consulta_d:"Browses the directory and markets. No contacts and no actions.",
+  perm_title:"Not available for your user level", perm_msg:"Your user level ({lvl}) does not allow you to {what}. If you need it, ask your company administrator.",
+  w_contacts:"see contact details", w_approve:"approve requests", w_users:"manage users", w_billing:"see the plan and payments",
+  team:"Company users", team_add:"Add user", team_email:"User email", team_level:"Level", team_added:"User added", team_removed:"User removed", team_you:"You", team_note:"In the live version each user gets an email invitation and creates their own password.", team_dup:"That email is already on the list", team_remove:"Remove",
+  billing:"Plan and payments", paid_until:"Paid until", bill_status:"Status", st_active:"Active", st_demo:"Demo, no charge", pay_bold:"Pay online with Bold",
+  bold_demo_title:"Online payment with Bold", bold_demo_msg:"The demo does not charge. In the live version this button opens Bold's secure checkout (card, PSE, Nequi and more) and, once the payment is approved, the company account is brought up to date automatically, with no receipts to send.",
+  bill_other:"The plan and payments are managed by your company administrator.",
+  status_sent:"Sent", status_pending:"Awaiting approval", status_rejected:"Rejected",
+  to_approve:"Requests awaiting approval", approve:"Approve", reject:"Reject", approved_ok:"Request approved and sent", rejected_ok:"Request rejected", none_pending:"No requests awaiting approval.",
+  rfq_pending_ok:"Request saved. It awaits approval by the sales director.", by:"Prepared by",
+  back_exit:"Press \"back\" again to leave Global Trade Finder.",
+  how_title:"How does it help your company?",
+  how1_t:"Sell abroad", how1_d:"Find buyers of your product in other countries and send them an offer.", how1_b:"Find buyers",
+  how2_t:"Buy abroad", how2_d:"Find suppliers of what you need and ask them for a quote.", how2_b:"Find suppliers",
+  how3_t:"Study markets", how3_d:"Before exporting, see which countries buy your product and how many companies there are.", how3_b:"Explore markets",
+  how_steps:"1. Search by product or HS code · 2. Review the company profile · 3. Send your offer or request · 4. Get alerts on new opportunities"
+});
+
+/* ---------- Precios mensuales (COP), aprobados oct 2026 ---------- */
+const PRICES = { buyer:149000, supplier:149000, both:249000 };
+const money = (n) => (LANG==="en" ? "COP $" : "$") + Number(n).toLocaleString(LANG==="en"?"en-US":"es-CO");
+/* usuarios ilimitados: el valor mensual es solo el del plan, sin cobro por usuario */
+const monthlyTotal = () => ({ total: PRICES[PLAN]||0 });
+
+/* ---------- Niveles y permisos ---------- */
+const LEVELS = ["admin","director","asesor","analista","consulta"];
+const PERM = {
+  admin:    { contacts:1, send:1, approve:1, export:1, alerts:1, save:1, profile:1, users:1, billing:1 },
+  director: { contacts:1, send:1, approve:1, export:1, alerts:1, save:1 },
+  asesor:   { contacts:1, send:1, alerts:1, save:1 },
+  analista: { export:1, alerts:1, save:1 },
+  consulta: {}
+};
+let ULEVEL = store.get("ulevel", "admin");
+if(!LEVELS.includes(ULEVEL)) ULEVEL = "admin";
+/* ¿el usuario actual puede hacer esto? (las empresas sin perfil aún: solo crear el perfil) */
+function can(p){
+  if(!PAID()) return false;
+  if(!ACC) return p==="profile";
+  return !!PERM[ULEVEL][p];
+}
+/* aviso cuando el plan es gratuito o el nivel no lo permite; devuelve true si bloquea */
+function gateP(perm, what){
+  if(gate(what)) return true;
+  if(can(perm)) return false;
+  modal(`<h2>${t("perm_title")}</h2><p>${t("perm_msg",{lvl:t("lvl_"+ULEVEL), what:t(what)})}</p><div class="acts"><button class="btn btn-main" data-close>${t("close")}</button></div>`);
+  return true;
+}
+function setLevel(l){ if(!LEVELS.includes(l)) return; ULEVEL = l; store.set("ulevel", l); toast(t("lvl_title")+": "+t("lvl_"+l)); render(); }
+
+/* ---------- Equipo de la empresa (demostración) ---------- */
+function teamList(){
+  let list = store.get("users", []);
+  if(!list.length && ACC){
+    list = [
+      { email: ACC.email || DEMO_EMAIL, level:"admin", me:true },
+      { email:"direccion.comercial@empresa-demo.example", level:"director" },
+      { email:"asesor1@empresa-demo.example", level:"asesor" },
+      { email:"mercados@empresa-demo.example", level:"analista" },
+      { email:"contabilidad@empresa-demo.example", level:"consulta" }
+    ];
+    store.set("users", list);
+  }
+  return list;
+}
+function teamPanel(){
+  if(!can("users")) return "";
+  const list = teamList();
+  const opt = (sel) => LEVELS.map(l=>`<option value="${l}" ${sel===l?"selected":""}>${t("lvl_"+l)}</option>`).join("");
+  return `<div class="panel"><h2>${t("team")}</h2>
+    <p class="muted" style="margin:0 0 8px;font-size:.9rem">${t("users_count",{a:list.length})}</p>
+    <div class="tablewrap" style="border:0"><table class="t"><thead><tr><th>${t("team_email")}</th><th>${t("team_level")}</th><th></th></tr></thead><tbody>
+    ${list.map((u,i)=>`<tr><td style="overflow-wrap:anywhere">${esc(u.email)}${u.me?` <span class="mine">${t("team_you")}</span>`:""}</td>
+      <td>${u.me ? esc(t("lvl_admin")) : `<select data-ulvl="${i}" aria-label="${esc(t("team_level"))}">${opt(u.level)}</select>`}</td>
+      <td class="r">${u.me?"":`<button class="linkbtn" data-urem="${i}">${t("team_remove")}</button>`}</td></tr>`).join("")}
+    </tbody></table></div>
+    <form id="uform" class="fields" style="margin-top:12px" novalidate>
+      <div class="field"><label for="u-email">${t("team_email")}</label><input id="u-email" type="email" placeholder="nombre@empresa.com"><div class="err" id="e-uemail"></div></div>
+      <div class="field"><label for="u-level">${t("team_level")}</label><select id="u-level">${opt("asesor")}</select></div>
+      <div class="full"><button class="btn btn-ghost btn-sm" type="submit">${t("team_add")}</button></div>
+    </form>
+    <p class="muted" style="font-size:.85rem;margin:10px 0 0">${t("team_note")}</p></div>`;
+}
+function bindTeam(){
+  const f = $("#uform"); if(!f) return;
+  f.onsubmit = (e) => { e.preventDefault();
+    const email = $("#u-email").value.trim().toLowerCase(), list = teamList();
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ $("#e-uemail").textContent = t("err_email"); return; }
+    if(list.some(u=>u.email===email)){ $("#e-uemail").textContent = t("team_dup"); return; }
+    list.push({ email, level: LEVELS.includes($("#u-level").value) ? $("#u-level").value : "consulta" });
+    store.set("users", list.slice(0,1000)); toast(t("team_added")); render(); };
+  $$("[data-ulvl]").forEach(s => s.onchange = () => { const list = teamList(); const u = list[+s.dataset.ulvl]; if(u && !u.me && LEVELS.includes(s.value)){ u.level = s.value; store.set("users", list); } });
+  $$("[data-urem]").forEach(b => b.onclick = () => { const list = teamList(); const u = list[+b.dataset.urem]; if(u && !u.me){ list.splice(+b.dataset.urem,1); store.set("users", list); toast(t("team_removed")); render(); } });
+}
+
+/* ---------- Plan y pagos (solo el administrador ve el detalle) ---------- */
+function billingPanel(){
+  if(!PAID()) return "";
+  const planName = t(PLAN);
+  if(!can("billing")) return `<div class="panel"><h2>${t("my_plan")}</h2><p style="margin:0 0 6px"><b>${planName}</b></p><p class="muted" style="margin:0">${t("bill_other")}</p></div>`;
+  const end = new Date(); end.setMonth(end.getMonth()+1, 0);
+  const demo = isDemo();
+  return `<div class="panel"><h2>${t("billing")}</h2>
+    <dl class="kv"><dt>${t("my_plan")}</dt><dd>${planName}</dd>
+      <dt>${t("monthly_value")}</dt><dd class="num">${money(monthlyTotal().total)}</dd>
+      <dt>${t("paid_until")}</dt><dd class="num">${end.toLocaleDateString(LANG==="en"?"en-US":"es-CO",{day:"numeric",month:"long",year:"numeric"})}</dd>
+      <dt>${t("bill_status")}</dt><dd><span class="role both">${demo?t("st_demo"):t("st_active")}</span></dd></dl>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn btn-main btn-sm" id="b-bold">${t("pay_bold")}</button><a class="btn btn-ghost btn-sm" href="#planes">${t("see_plans")}</a></div></div>`;
+}
+function bindBilling(){
+  const b = $("#b-bold"); if(b) b.onclick = () => modal(`<h2>${t("bold_demo_title")}</h2><p><b>${t("monthly_value")}: ${money(monthlyTotal().total)}</b></p><p>${t("bold_demo_msg")}</p><div class="acts"><button class="btn btn-main" data-close>${t("close")}</button></div>`);
+}
+
+/* ---------- Aprobación de solicitudes ---------- */
+function approvalPanel(){
+  if(!can("approve")) return "";
+  const pend = store.get("requests", []).filter(r => r.status==="pending");
+  return `<div class="panel"><h2>${t("to_approve")} · ${pend.length}</h2>
+    ${pend.length ? `<div class="tablewrap" style="border:0"><table class="t"><tbody>${pend.slice(0,50).map(r=>`<tr>
+      <td><a href="#empresa-${esc(r.coId)}">${esc(r.coName)}</a><div class="muted" style="font-size:.8rem">${t(r.kind==="offer"?"offer_title":r.kind==="contact"?"request_contact":"rfq_title")} · ${t("by")}: ${esc(t("lvl_"+(r.by||"asesor")))}</div></td>
+      <td class="codecell">${r.code?fmtCode(r.code):"—"}</td>
+      <td class="r" style="white-space:nowrap"><button class="btn btn-main btn-sm" data-appr="${r.id}">${t("approve")}</button> <button class="linkbtn" data-rej="${r.id}">${t("reject")}</button></td></tr>`).join("")}</tbody></table></div>`
+      : `<p class="muted">${t("none_pending")}</p>`}</div>`;
+}
+function bindApproval(){
+  const act = (id, st) => {
+    if(!can("approve")) return;
+    const list = store.get("requests", []); const r = list.find(x => String(x.id)===String(id));
+    if(!r || r.status!=="pending") { render(); return; }      // solo si sigue pendiente (evita doble clic)
+    r.status = st; r.decidedAt = new Date().toISOString(); store.set("requests", list);
+    toast(st==="sent" ? t("approved_ok") : t("rejected_ok")); render();
+  };
+  $$("[data-appr]").forEach(b => b.onclick = () => act(b.dataset.appr, "sent"));
+  $$("[data-rej]").forEach(b => b.onclick = () => act(b.dataset.rej, "rejected"));
+}
+const statusPill = (s) => { s = s || "sent"; const cls = s==="pending" ? "buyer" : s==="rejected" ? "supplier" : "both"; return `<span class="role ${cls}">${t("status_"+s)}</span>`; };
+
+/* ---------- Guía de uso en la portada ---------- */
+function howBlock(){
+  return `<section style="padding-top:8px"><div class="sec-head"><h2>${t("how_title")}</h2></div>
+    <div class="grid">
+      <div class="tile"><h3>${t("how1_t")}</h3><p style="margin:0" class="muted">${t("how1_d")}</p><button class="btn btn-amb btn-sm" style="align-self:flex-start;margin-top:6px" data-how="buyers">${t("how1_b")}</button></div>
+      <div class="tile"><h3>${t("how2_t")}</h3><p style="margin:0" class="muted">${t("how2_d")}</p><button class="btn btn-amb btn-sm" style="align-self:flex-start;margin-top:6px" data-how="suppliers">${t("how2_b")}</button></div>
+      <div class="tile"><h3>${t("how3_t")}</h3><p style="margin:0" class="muted">${t("how3_d")}</p><a class="btn btn-amb btn-sm" style="align-self:flex-start;margin-top:6px" href="#mercados">${t("how3_b")}</a></div>
+    </div>
+    <p class="muted" style="margin:12px 0 0;font-size:.92rem">${t("how_steps")}</p></section>`;
+}
+function bindHow(){ $$("[data-how]").forEach(b => b.onclick = () => { Object.assign(S,{mode:b.dataset.how,q:"",hs:"",cc:"",sub:"",cont:"",sector:"",verified:false}); shown=PAGE; go("buscar"); }); }
+
+/* ---------- Botón "atrás": nunca saca de la app sin aviso ---------- */
+function installBackGuard(){
+  try {
+    history.replaceState({ gtf:"root" }, "", location.href);
+    history.pushState({ gtf:"app" }, "", location.href);
+    let warned = 0;
+    window.addEventListener("popstate", (e) => {
+      if($(".modal-bg")) closeModal();
+      if(e.state && e.state.gtf==="root"){
+        if(Date.now() - warned < 3000){ history.back(); return; }   // segundo "atrás": sale
+        warned = Date.now(); toast(t("back_exit"));
+        history.pushState({ gtf:"app" }, "", location.href);
+      }
+    });
+  } catch(e){ /* navegador sin historial manipulable: se usa el comportamiento normal */ }
+}
 
 /* ================================================================
    GLOBAL TRADE FINDER — registro, cuenta, ventanas y enrutador
@@ -1461,6 +1714,32 @@ function bindPlans(){ $$("[data-demo]").forEach(b => b.onclick = () => { PLAN = 
 /* ---------- Registro de empresa ---------- */
 let REG = null;
 function regDraft(){ return ACC ? JSON.parse(JSON.stringify(ACC)) : { role:"", name:"", taxid:"", cc:"CO", city:"", sector:"", codes:[], markets:[], web:"", contact:"", jobrole:"", email:"", phone:"", desc:"", ok:false }; }
+function vObserver(){
+  const o = OBS || {name:"",email:"",cc:"CO"};
+  const ccOpts = ALL_CC.map(cc=>[cc,cname(cc)]).sort((a,b)=>a[1].localeCompare(b[1])).map(([cc,n])=>`<option value="${cc}" ${o.cc===cc?"selected":""}>${esc(n)}</option>`).join("");
+  return `<div class="wrap page" style="max-width:760px">${crumbs([{label:t("home"),href:"#inicio"},{label:t("obs_title")}])}
+  <h1>${t("obs_title")}</h1><p class="lead">${t("obs_lead")}</p>
+  <form id="oform" class="panel stack" style="margin-top:16px" novalidate>
+    <div class="fields">
+      <div class="field full"><label for="o-name">${t("obs_name")}</label><input id="o-name" value="${esc(o.name)}"><div class="err" id="e-oname"></div></div>
+      <div class="field"><label for="o-email">${t("r_email")}</label><input id="o-email" type="email" value="${esc(o.email)}"><div class="err" id="e-oemail"></div></div>
+      <div class="field"><label for="o-cc">${t("r_country")}</label><select id="o-cc">${ccOpts}</select></div>
+    </div>
+    <label class="check"><input type="checkbox" id="o-ok"><span>${t("r_accept")} <a href="#terminos">${t("terms")}</a> · <a href="#privacidad">${t("privacy")}</a></span></label>
+    <div class="err" id="e-ook"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="submit" class="btn btn-main">${t("obs_save")}</button><a class="btn btn-ghost" href="#planes">${t("see_plans")}</a></div>
+  </form></div>`;
+}
+function bindObserver(){
+  $("#oform").onsubmit = (e) => { e.preventDefault();
+    const name=$("#o-name").value.trim(), email=$("#o-email").value.trim(); let bad=false;
+    $("#e-oname").textContent = name?"":(bad=true,t("err_req"));
+    $("#e-oemail").textContent = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)?"":(bad=true,t("err_email"));
+    $("#e-ook").textContent = $("#o-ok").checked?"":(bad=true,t("err_accept"));
+    if(bad) return;
+    OBS = {name,email,cc:$("#o-cc").value,at:new Date().toISOString()}; store.set("observer",OBS);
+    toast(t("obs_saved")); go("cuenta"); };
+}
 function vRegister(){
   if(!REG) REG = regDraft();
   const f = (id,label,type="text",full=false,ph="") => `<div class="field ${full?"full":""}"><label for="r-${id}">${label}</label><input id="r-${id}" data-k="${id}" type="${type}" value="${esc(REG[id]||"")}" placeholder="${esc(ph)}"><div class="err" id="e-${id}"></div></div>`;
@@ -1502,14 +1781,15 @@ function bindRegister(){
   $("#r-markets").onchange = (e) => { REG.markets = [...e.target.selectedOptions].map(o=>o.value); };
   $("#r-ok").onchange = (e) => REG.ok = e.target.checked;
   const addCode = () => {
+    if(!$("#r-hs")) return;               // el usuario ya salió del formulario
     const v = $("#r-hs").value.trim(); if(!v) return;
     let code = (v.match(/^\d{2,6}/)||[])[0];
     if(!code){ const found = searchCodes(v)[0]; code = found; }
     if(code && (CODE[code]||CHAP[code]) && !REG.codes.includes(code)){ REG.codes.push(code); if(!REG.sector && CODE[code]) REG.sector = CODE[code].sector; }
-    $("#r-hs").value = ""; render(); setTimeout(()=>$("#r-hs")?.focus(),0);
+    $("#r-hs").value = ""; setTimeout(() => { render(); $("#r-hs")?.focus(); }, 0);
   };
   $("#r-hs-add").onclick = addCode;
-  $("#r-hs").addEventListener("change", addCode);
+  $("#r-hs").addEventListener("change", () => setTimeout(addCode, 0));
   $("#r-hs").addEventListener("keydown", e => { if(e.key==="Enter"){ e.preventDefault(); addCode(); } });
   $$("[data-rm]",form).forEach(b => b.onclick = () => { REG.codes = REG.codes.filter(c=>c!==b.dataset.rm); render(); });
   form.onsubmit = (e) => {
@@ -1532,24 +1812,39 @@ function bindRegister(){
 
 /* ---------- Mi cuenta ---------- */
 function vAccount(){
-  if(!ACC) return `<div class="wrap page">${crumbs([{label:t("home"),href:"#inicio"},{label:t("acc_title")}])}<div class="empty" style="margin-top:20px"><b>${t("acc_none")}</b>${t("acc_none_d")}<p><a class="btn btn-main" href="#registro">${t("nav_register")}</a></p></div></div>`;
-  const saved = store.get("saved", []), alerts = store.get("alerts", []), reqs = store.get("requests", []);
+  if(!PAID()){
+    if(!OBS) return `<div class="wrap page">${crumbs([{label:t("home"),href:"#inicio"},{label:t("acc_title")}])}<div class="empty" style="margin-top:20px"><b>${t("obs_title")}</b>${t("obs_lead")}<p><a class="btn btn-main" href="#registro">${t("nav_signup")}</a> <a class="btn btn-ghost" href="#planes">${t("see_plans")}</a></p></div></div>`;
+    return `<div class="wrap page">${crumbs([{label:t("home"),href:"#inicio"},{label:t("acc_title")}])}
+    <h1>${t("acc_title")}</h1>
+    <div class="two" style="margin-top:16px">
+      <div class="panel"><h2>${t("acc_observer")}</h2><dl class="kv"><dt>${t("obs_name")}</dt><dd>${esc(OBS.name)}</dd><dt>${t("r_email")}</dt><dd>${esc(OBS.email)}</dd><dt>${t("r_country")}</dt><dd>${esc(cname(OBS.cc))}</dd></dl>
+        <div class="lock" style="margin-top:14px"><b>${t("gate_title")}</b>${t("obs_locked")}</div></div>
+      <div class="stack"><div class="panel"><h2>${t("my_plan")}</h2><p style="margin:0 0 10px"><b>${t("plan_free")}</b></p><a class="btn btn-main btn-sm" href="#planes">${t("see_plans")}</a></div>
+      <button class="linkbtn" id="b-logout" style="align-self:flex-start;color:var(--danger)">${t("logout")}</button></div>
+    </div></div>`;
+  }
+  if(!ACC) return `<div class="wrap page">${crumbs([{label:t("home"),href:"#inicio"},{label:t("acc_title")}])}<div class="empty" style="margin-top:20px"><b>${t(PLAN)}</b>${t("no_profile")}<p><a class="btn btn-main" href="#registro">${t("create_profile")}</a></p></div></div>`;
+
+  const saved = store.get("saved", []), alerts = store.get("alerts", []).slice(0,100), allReqs = store.get("requests", []), reqs = allReqs.slice(0,100);
   return `<div class="wrap page">${crumbs([{label:t("home"),href:"#inicio"},{label:t("acc_title")}])}
   <h1>${t("acc_title")}</h1>
   <div class="two" style="margin-top:16px">
     <div class="stack">
+      ${approvalPanel()}
       <div class="panel"><h2>${t("saved_searches")}</h2>${saved.length?`<div class="tablewrap" style="border:0"><table class="t"><tbody>${saved.map(s=>`<tr><td>${esc(describeSearch(s.f))}</td><td class="r num">${searchCompanies(s.f).length}</td><td class="r" style="white-space:nowrap"><button class="btn btn-ghost btn-sm" data-run="${s.id}">${t("run")}</button> <button class="linkbtn" data-delsaved="${s.id}">${t("del")}</button></td></tr>`).join("")}</tbody></table></div>`:`<p class="muted">${t("none_saved")}</p>`}</div>
       <div class="panel"><div class="sec-head" style="margin-bottom:8px"><h2 style="margin:0">${t("alerts")}</h2><button class="btn btn-ghost btn-sm" id="b-newalert">${t("create_alert")}</button></div>
         ${alerts.length?`<div class="tablewrap" style="border:0"><table class="t"><tbody>${alerts.map(a=>`<tr><td><b>${esc(a.name)}</b><div class="muted" style="font-size:.84rem">${esc(describeSearch(a.f))} · ${t(a.freq)}</div></td><td class="r num">${searchCompanies(a.f).length} <span class="muted" style="font-size:.8rem">${t("matches_now")}</span></td><td class="r"><button class="linkbtn" data-delalert="${a.id}">${t("del")}</button></td></tr>`).join("")}</tbody></table></div>`:`<p class="muted">${t("none_alerts")}</p>`}</div>
-      <div class="panel"><h2>${t("requests")}</h2>${reqs.length?`<div class="tablewrap" style="border:0"><table class="t"><thead><tr><th>${t("companies")}</th><th>${t("lv_hs")}</th><th>${t("rfq_qty")}</th><th>${t("generated")}</th></tr></thead><tbody>${reqs.map(r=>`<tr><td><a href="#empresa-${r.coId}">${esc(r.coName)}</a><div class="muted" style="font-size:.8rem">${t(r.kind==="offer"?"offer_title":r.kind==="contact"?"request_contact":"rfq_title")}</div></td><td class="codecell">${r.code?fmtCode(r.code):"—"}</td><td class="num">${esc(r.qty?r.qty+" "+r.unit:"—")}</td><td class="num">${new Date(r.at).toLocaleDateString(LANG==="en"?"en-US":"es-CO")}</td></tr>`).join("")}</tbody></table></div>`:`<p class="muted">${t("none_requests")}</p>`}</div>
+      <div class="panel"><h2>${t("requests")}</h2>${reqs.length?`<div class="tablewrap" style="border:0"><table class="t"><thead><tr><th>${t("companies")}</th><th>${t("lv_hs")}</th><th>${t("rfq_qty")}</th><th>${t("bill_status")}</th><th>${t("generated")}</th></tr></thead><tbody>${reqs.map(r=>`<tr><td><a href="#empresa-${r.coId}">${esc(r.coName)}</a><div class="muted" style="font-size:.8rem">${t(r.kind==="offer"?"offer_title":r.kind==="contact"?"request_contact":"rfq_title")}</div></td><td class="codecell">${r.code?fmtCode(r.code):"—"}</td><td class="num">${esc(r.qty?r.qty+" "+r.unit:"—")}</td><td>${statusPill(r.status)}</td><td class="num">${new Date(r.at).toLocaleDateString(LANG==="en"?"en-US":"es-CO")}</td></tr>`).join("")}</tbody></table></div>${allReqs.length>100?`<p class="muted" style="font-size:.85rem">${t("showing_last")}</p>`:""}`:`<p class="muted">${t("none_requests")}</p>`}</div>
+      ${teamPanel()}
     </div>
     <div class="stack">
       <div class="panel"><h2>${t("my_company")}</h2>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">${roleTag(ACC.role)}${ccTag(ACC.cc)}</div>
         <h3 style="font-size:1.4rem">${esc(ACC.name)}</h3><p class="muted" style="margin:4px 0 10px">${esc(ACC.city)}, ${esc(cname(ACC.cc))} · ${esc(L(SECTOR[ACC.sector]))}</p>
         <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px">${ACC.codes.map(c=>codeChip(c)).join("")}</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn btn-ghost btn-sm" href="#empresa-me">${t("view_profile")}</a><a class="btn btn-ghost btn-sm" href="#registro">${t("edit")}</a></div></div>
-      <div class="panel"><h2>${t("my_plan")}</h2><p style="margin:0 0 10px"><b>${PLAN==="free"?t("plan_free"):t(PLAN)}</b></p><a class="btn btn-main btn-sm" href="#planes">${t("see_plans")}</a></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn btn-ghost btn-sm" href="#empresa-me">${t("view_profile")}</a>${can("profile")?`<a class="btn btn-ghost btn-sm" href="#registro">${t("edit")}</a>`:""}</div></div>
+      <div class="panel"><h2>${t("lvl_title")}</h2><p style="margin:0 0 4px"><b>${t("lvl_"+ULEVEL)}</b></p><p class="muted" style="margin:0;font-size:.92rem">${t("lvl_"+ULEVEL+"_d")}</p></div>
+      ${billingPanel()}
       <button class="linkbtn" id="b-logout" style="align-self:flex-start;color:var(--danger)">${t("logout")}</button>
     </div>
   </div></div>`;
@@ -1559,8 +1854,9 @@ function bindAccount(){
   $$("[data-delsaved]").forEach(b => b.onclick = () => { store.set("saved", store.get("saved",[]).filter(x=>x.id!=b.dataset.delsaved)); render(); });
   $$("[data-delalert]").forEach(b => b.onclick = () => { store.set("alerts", store.get("alerts",[]).filter(x=>x.id!=b.dataset.delalert)); render(); });
   const na = $("#b-newalert"); if(na) na.onclick = () => openAlert();
+  bindTeam(); bindBilling(); bindApproval();
   const lo = $("#b-logout"); if(lo) lo.onclick = () => modal(`<h2>${t("logout")}</h2><p>${t("logout_confirm")}</p><div class="acts"><button class="btn btn-ghost" data-close>${t("cancel")}</button><button class="btn btn-main" id="m-yes" style="background:var(--danger)">${t("yes_delete")}</button></div>`, (m) => {
-    $("#m-yes",m).onclick = () => { ["account","saved","alerts","requests","plan"].forEach(store.del); ACC=null; PLAN="free"; closeModal(); go("inicio"); };
+    $("#m-yes",m).onclick = () => { ["account","saved","alerts","requests","plan","observer","ulevel","users"].forEach(store.del); ACC=null; OBS=null; PLAN="free"; ULEVEL="admin"; closeModal(); go("inicio"); };
   });
 }
 
@@ -1579,7 +1875,8 @@ function escClose(e){ if(e.key==="Escape") closeModal(); }
 function closeModal(){ $("#modalRoot").innerHTML = ""; document.body.classList.remove("pr"); document.removeEventListener("keydown", escClose); }
 
 function openRFQ(co, kind){
-  if(!ACC){ modal(`<h2>${t(kind==="offer"?"offer_title":kind==="contact"?"request_contact":"rfq_title")}</h2><p>${t("need_account")}</p><div class="acts"><button class="btn btn-ghost" data-close>${t("cancel")}</button><a class="btn btn-main" href="#registro" data-close>${t("nav_register")}</a></div>`); return; }
+  if(gateP("send","w_rfq")) return;
+  if(!ACC){ modal(`<h2>${t(kind==="offer"?"offer_title":kind==="contact"?"request_contact":"rfq_title")}</h2><p>${t("need_account")}</p><div class="acts"><button class="btn btn-ghost" data-close>${t("cancel")}</button><a class="btn btn-main" href="#registro" data-close>${t("create_profile")}</a></div>`); return; }
   const reqs = store.get("requests", []);
   const month = new Date().toISOString().slice(0,7);
   if(reqs.filter(r=>r.at.startsWith(month)).length >= reqLimit()){ modal(`<h2>${t("nav_plans")}</h2><p>${t("limit_req")}</p><div class="acts"><button class="btn btn-ghost" data-close>${t("close")}</button><a class="btn btn-main" href="#planes" data-close>${t("see_plans")}</a></div>`); return; }
@@ -1599,13 +1896,16 @@ function openRFQ(co, kind){
     </form>`, (m) => {
     $$("[data-close]", m).forEach(b => b.onclick = closeModal);
     $("#qform", m).onsubmit = (e) => { e.preventDefault();
-      const r = { id:Date.now(), kind, coId:co.id, coName:co.name, code:$("#q-code",m)?.value||"", qty:$("#q-qty",m)?.value||"", unit:$("#q-unit",m)?.value||"", inc:$("#q-inc",m)?.value||"", dest:$("#q-dest",m)?.value||"", msg:$("#q-msg",m).value, at:new Date().toISOString() };
-      store.set("requests", [r, ...store.get("requests", [])]); closeModal(); toast(t("rfq_ok")); };
+      const qtyEl = $("#q-qty",m);
+      if(qtyEl){ const n = Number(qtyEl.value); if(!Number.isFinite(n) || n < 1 || n > 1e7){ qtyEl.setCustomValidity(t("err_qty")); qtyEl.reportValidity(); qtyEl.focus(); return; } qtyEl.setCustomValidity(""); }
+      const r = { id:Date.now(), kind, coId:co.id, coName:co.name, code:$("#q-code",m)?.value||"", qty:$("#q-qty",m)?.value||"", unit:$("#q-unit",m)?.value||"", inc:$("#q-inc",m)?.value||"", dest:$("#q-dest",m)?.value||"", msg:$("#q-msg",m).value, at:new Date().toISOString(), by:ULEVEL, status: can("approve") ? "sent" : "pending" };
+      store.set("requests", [r, ...store.get("requests", [])].slice(0, 500)); closeModal(); toast(r.status==="pending" ? t("rfq_pending_ok") : t("rfq_ok")); };
   });
 }
 
 function openAlert(){
-  if(!ACC){ modal(`<h2>${t("alert_title")}</h2><p>${t("need_account")}</p><div class="acts"><button class="btn btn-ghost" data-close>${t("cancel")}</button><a class="btn btn-main" href="#registro" data-close>${t("nav_register")}</a></div>`); return; }
+  if(gateP("alerts","w_alert")) return;
+  if(!ACC){ modal(`<h2>${t("alert_title")}</h2><p>${t("need_account")}</p><div class="acts"><button class="btn btn-ghost" data-close>${t("cancel")}</button><a class="btn btn-main" href="#registro" data-close>${t("create_profile")}</a></div>`); return; }
   const alerts = store.get("alerts", []);
   if(alerts.length >= alertLimit()){ modal(`<h2>${t("alert_title")}</h2><p>${t("alert_limit")}</p><div class="acts"><button class="btn btn-ghost" data-close>${t("close")}</button><a class="btn btn-main" href="#planes" data-close>${t("see_plans")}</a></div>`); return; }
   const base = (S.mode==="buyers"||S.mode==="suppliers") ? {...S} : {...S, mode: ACC.role==="buyer" ? "suppliers" : "buyers", hs: S.hs || ACC.codes[0] || ""};
@@ -1640,7 +1940,7 @@ function exportRows(){
 }
 const reportFootText = () => `${t("report_by")} · ${SG.mail} · WhatsApp ${SG.wa} · ${t("generated")}: ${new Date().toLocaleString(LANG==="en"?"en-US":"es-CO")}`;
 function openExport(){
-  if(PLAN==="free"){ modal(`<h2>${t("export_title")}</h2><p>${t("export_locked")}</p><div class="acts"><button class="btn btn-ghost" data-close>${t("close")}</button><a class="btn btn-main" href="#planes" data-close>${t("see_plans")}</a></div>`); return; }
+  if(gateP("export","w_export")) return;
   const { head, rows } = exportRows();
   const title = describeSearch(S);
   modal(`<div style="display:flex;gap:10px;align-items:center;margin-bottom:6px"><span style="width:34px;height:34px;display:block">${ICON.logo}</span><div><h2 style="margin:0">Global Trade Finder</h2><div class="muted" style="font-size:.86rem">${esc(title)}</div></div></div>
@@ -1690,12 +1990,19 @@ function vPrivacy(){
 const vNotFound = () => `<div class="wrap page"><div class="empty"><b>404</b><a href="#inicio">${t("home")}</a></div></div>`;
 
 /* ---------- Enrutador ---------- */
+let RENDERING = false;
 function render(){
-  const h = decodeURIComponent((location.hash||"#inicio").slice(1)) || "inicio";
+  if(RENDERING){ setTimeout(render, 0); return; }   // evita redibujar dentro de otro redibujo (blur/change)
+  RENDERING = true;
+  try { renderNow(); } finally { RENDERING = false; }
+}
+function renderNow(){
+  let h; try { h = decodeURIComponent((location.hash||"#inicio").slice(1)) || "inicio"; } catch(e){ h = "404"; }
+  h = h.replace(/^(pais|pc)-([a-z]{2})/, (m,a,b)=>a+"-"+b.toUpperCase());
   const [r, a, b] = h.split("-");
   let html, bind = null;
   switch(r){
-    case "inicio": html = vHome(); bind = bindSearchBox; break;
+    case "inicio": html = vHome(); bind = () => { bindSearchBox(); bindHow(); }; break;
     case "buscar": html = vSearch(); bind = bindSearch; break;
     case "mercados": html = vMarkets(); break;
     case "region": html = vRegion(a); break;
@@ -1708,7 +2015,7 @@ function render(){
     case "empresas": html = vDirectory(); bind = bindDirectory; break;
     case "empresa": html = vCompany(a); bind = () => bindCompany(a); break;
     case "planes": html = vPlans(); bind = bindPlans; break;
-    case "registro": html = vRegister(); bind = bindRegister; break;
+    case "registro": if(PAID() && !can("profile")){ html = `<div class="wrap page"><div class="empty"><b>${t("perm_title")}</b>${t("perm_msg",{lvl:t("lvl_"+ULEVEL),what:t("w_profile")})}</div></div>`; } else if(PAID()){ html = vRegister(); bind = bindRegister; } else { html = vObserver(); bind = bindObserver; } break;
     case "cuenta": html = vAccount(); bind = bindAccount; break;
     case "terminos": html = vTerms(); break;
     case "privacidad": html = vPrivacy(); break;
@@ -1723,11 +2030,13 @@ function render(){
 let lastRoute = "";
 window.addEventListener("hashchange", () => {
   const r = (location.hash||"#inicio").slice(1);
+  if($(".modal-bg")) closeModal();
   if(r!==lastRoute){ if(!r.startsWith("buscar") && !r.startsWith("empresas")) shown = PAGE; lastRoute = r; render(); window.scrollTo(0,0); }
 });
 $$(".lang button").forEach(b => b.onclick = () => { LANG = b.dataset.lang; store.set("lang", LANG); render(); });
 $("#menuBtn").onclick = () => { const n = $("#mainNav"); n.classList.toggle("open"); $("#menuBtn").setAttribute("aria-expanded", n.classList.contains("open")); };
 lastRoute = (location.hash||"#inicio").slice(1);
+installBackGuard();
 render();
 
 </script>
